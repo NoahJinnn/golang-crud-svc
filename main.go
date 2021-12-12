@@ -12,7 +12,7 @@ import (
 var (
 	host     = "localhost"
 	port     = "1433"
-	user     = "master"
+	user     = "sa"
 	password = "Iot@@123"
 	database = "DevDB"
 )
