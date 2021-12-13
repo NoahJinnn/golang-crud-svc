@@ -7,5 +7,5 @@ import (
 type Area struct {
 	gorm.Model
 	Gateway Gateway
-	Name    string `gorm:unique;not null json:"name"`
+	Name    string `gorm:"unique;not null" json:"name"`
 }

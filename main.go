@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ecoprohcm/DMS_BackendServer/handlers"
+	"github.com/ecoprohcm/DMS_BackendServer/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
@@ -17,22 +18,20 @@ var (
 	database = "DevDB"
 )
 
-func setupRouter() *gin.Engine {
+func setupRouter(handler handlers.HttpHandler) *gin.Engine {
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(200, "pong")
-	})
+	r.GET("/", handler.CreateGateway)
 	return r
 }
 
 func main() {
 	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", user, password, host, port, database)
 	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
-	handlers.NewHttpHandler(db)
+	handler := handlers.NewHttpHandler(db)
 	if err != nil {
 		panic("failed to connect database")
 	}
-
-	r := setupRouter()
+	db.AutoMigrate(&models.Gateway{})
+	r := setupRouter(*handler)
 	r.Run(":8080")
 }
