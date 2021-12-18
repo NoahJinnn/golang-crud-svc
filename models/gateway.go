@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"gorm.io/gorm"
@@ -10,9 +9,10 @@ import (
 
 type Gateway struct {
 	gorm.Model
-	AreaID    uint   `json:"areaId"`
-	GatewayID string `gorm:"unique;not null" json:"gatewayId"`
-	Name      string `gorm:"unique;not null" json:"name"`
+	AreaID    uint       `json:"areaId"`
+	MacID     string     `gorm:"unique;not null" json:"macId"`
+	Name      string     `gorm:"unique;not null" json:"name"`
+	Doorlocks []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type GatewaySvc struct {
@@ -53,17 +53,12 @@ func (gs *GatewaySvc) CreateGateway(ctx context.Context, g *Gateway) (*Gateway, 
 
 func (gs *GatewaySvc) UpdateGateway(ctx context.Context, g *Gateway) (*Gateway, error) {
 	result := gs.db.Model(&g).Where("id = ?", g.ID).Updates(g)
-	err := result.Error
-	ra := result.RowsAffected
+	handled, err := utils.UpdateResultHandler(result, g)
 	if err != nil {
-		err = utils.QueryErrorHandler(err)
 		return nil, err
 	}
-	if ra > 0 {
-		return g, nil
-	} else {
-		return nil, fmt.Errorf("no record affected")
-	}
+	g = handled.(*Gateway)
+	return g, nil
 }
 
 func (gs *GatewaySvc) DeleteGateway(ctx context.Context, g *Gateway) (bool, error) {

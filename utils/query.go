@@ -14,6 +14,20 @@ func QueryErrorHandler(err error) error {
 	return err
 }
 
+func UpdateResultHandler(result *gorm.DB, returnVal interface{}) (interface{}, error) {
+	err := result.Error
+	ra := result.RowsAffected
+	if err != nil {
+		err = QueryErrorHandler(err)
+		return nil, err
+	}
+	if ra > 0 {
+		return returnVal, nil
+	} else {
+		return nil, fmt.Errorf("no record affected")
+	}
+}
+
 func DeleteResultHandler(result *gorm.DB) (bool, error) {
 	err := result.Error
 	ra := result.RowsAffected

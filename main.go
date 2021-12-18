@@ -18,22 +18,37 @@ var (
 	database = "DevDB"
 )
 
-func setupRouter(gwHandler *handlers.GatewayHandler, areaHandler *handlers.AreaHandler) *gin.Engine {
+func setupRouter(
+	gwHandler *handlers.GatewayHandler,
+	areaHandler *handlers.AreaHandler,
+	dlHandler *handlers.DoorlockHandler,
+) *gin.Engine {
 	r := gin.Default()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(CORSMiddleware())
 	v1R := r.Group("/v1")
 	{
+		// Gateway routes
 		v1R.GET("/gateways", gwHandler.FindAllGateway)
 		v1R.GET("/gateway/:id", gwHandler.FindGatewayByID)
 		v1R.POST("/gateway", gwHandler.CreateGateway)
 		v1R.PATCH("/gateway", gwHandler.UpdateGateway)
 		v1R.DELETE("/gateway", gwHandler.DeleteGateway)
+
+		// Area routes
 		v1R.GET("/areas", areaHandler.FindAllArea)
 		v1R.GET("/area/:id", areaHandler.FindAreaByID)
 		v1R.POST("/area", areaHandler.CreateArea)
+		v1R.PATCH("/area", areaHandler.UpdateArea)
 		v1R.DELETE("/area", areaHandler.DeleteArea)
+
+		// Doorlock routes
+		v1R.GET("/doorlocks", dlHandler.FindAllDoorlock)
+		v1R.GET("/doorlock/:id", dlHandler.FindDoorlockByID)
+		v1R.POST("/doorlock", dlHandler.CreateDoorlock)
+		v1R.PATCH("/doorlock", dlHandler.UpdateDoorlock)
+		v1R.DELETE("/doorlock", dlHandler.DeleteDoorlock)
 	}
 	return r
 }
@@ -72,15 +87,17 @@ func main() {
 
 	gwSvc := models.NewGatewaySvc(db)
 	areaSvc := models.NewAreaSvc(db)
+	dlSvc := models.NewDoorlockSvc(db)
 
 	gwHdlr := handlers.NewGatewayHandler(gwSvc)
 	areaHdlr := handlers.NewAreaHandler(areaSvc)
+	dlHdlr := handlers.NewDoorlockHandler(dlSvc)
 
 	if err != nil {
 		panic("failed to connect database")
 	}
 	migrate(db)
 
-	r := setupRouter(gwHdlr, areaHdlr)
+	r := setupRouter(gwHdlr, areaHdlr, dlHdlr)
 	r.Run(":8080")
 }

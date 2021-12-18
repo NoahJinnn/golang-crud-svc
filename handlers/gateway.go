@@ -66,7 +66,7 @@ func (h *GatewayHandler) CreateGateway(c *gin.Context) {
 		})
 		return
 	}
-	if len(gw.GatewayID) <= 0 || len(gw.Name) <= 0 {
+	if len(gw.MacID) <= 0 || len(gw.Name) <= 0 {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Msg:        "Missing on required fields: name, gateway id",

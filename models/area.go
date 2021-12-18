@@ -9,8 +9,10 @@ import (
 
 type Area struct {
 	gorm.Model
-	Gateway Gateway `gorm:"foreignKey:AreaID; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Name    string  `gorm:"unique;not null" json:"name"`
+	Gateway   Gateway    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Name      string     `gorm:"unique;not null" json:"name"`
+	Manager   string     `gorm:"unique;not null" json:"manager"`
+	Doorlocks []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 type AreaSvc struct {
 	db *gorm.DB
@@ -45,6 +47,16 @@ func (as *AreaSvc) CreateArea(a *Area, ctx context.Context) (*Area, error) {
 		err = utils.QueryErrorHandler(err)
 		return nil, err
 	}
+	return a, nil
+}
+
+func (as *AreaSvc) UpdateArea(ctx context.Context, a *Area) (*Area, error) {
+	result := as.db.Model(&a).Where("id = ?", a.ID).Updates(a)
+	handled, err := utils.UpdateResultHandler(result, a)
+	if err != nil {
+		return nil, err
+	}
+	a = handled.(*Area)
 	return a, nil
 }
 

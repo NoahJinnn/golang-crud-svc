@@ -9,30 +9,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AreaHandler struct {
-	svc *models.AreaSvc
+type DoorlockHandler struct {
+	svc *models.DoorlockSvc
 }
 
-func NewAreaHandler(svc *models.AreaSvc) *AreaHandler {
-	return &AreaHandler{
+func NewDoorlockHandler(svc *models.DoorlockSvc) *DoorlockHandler {
+	return &DoorlockHandler{
 		svc: svc,
 	}
 }
 
-func (h *AreaHandler) FindAllArea(c *gin.Context) {
-	aList, err := h.svc.FindAllArea(c)
+func (h *DoorlockHandler) FindAllDoorlock(c *gin.Context) {
+	dlList, err := h.svc.FindAllDoorlock(c)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get all areas failed",
+			Msg:        "Get all doorlocks failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, aList)
+	utils.ResponseJson(c, http.StatusOK, dlList)
 }
 
-func (h *AreaHandler) FindAreaByID(c *gin.Context) {
+func (h *DoorlockHandler) FindDoorlockByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
@@ -43,21 +43,21 @@ func (h *AreaHandler) FindAreaByID(c *gin.Context) {
 		})
 		return
 	}
-	a, err := h.svc.FindAreaByID(c, uint(id))
+	dl, err := h.svc.FindDoorlockByID(c, uint(id))
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get area failed",
+			Msg:        "Get doorlock failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, a)
+	utils.ResponseJson(c, http.StatusOK, dl)
 }
 
-func (h *AreaHandler) CreateArea(c *gin.Context) {
-	a := &models.Area{}
-	err := c.ShouldBind(a)
+func (h *DoorlockHandler) CreateDoorlock(c *gin.Context) {
+	dl := &models.Doorlock{}
+	err := c.ShouldBind(dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -66,22 +66,22 @@ func (h *AreaHandler) CreateArea(c *gin.Context) {
 		})
 		return
 	}
-	a, err = h.svc.CreateArea(a, c.Request.Context())
+	dl, err = h.svc.CreateDoorlock(dl, c.Request.Context())
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Create area failed",
+			Msg:        "Create doorlock failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, a)
+	utils.ResponseJson(c, http.StatusOK, dl)
 
 }
 
-func (h *AreaHandler) UpdateArea(c *gin.Context) {
-	a := &models.Area{}
-	err := c.ShouldBind(a)
+func (h *DoorlockHandler) UpdateDoorlock(c *gin.Context) {
+	dl := &models.Doorlock{}
+	err := c.ShouldBind(dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -90,21 +90,21 @@ func (h *AreaHandler) UpdateArea(c *gin.Context) {
 		})
 		return
 	}
-	a, err = h.svc.UpdateArea(c.Request.Context(), a)
+	dl, err = h.svc.UpdateDoorlock(c.Request.Context(), dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update area failed",
+			Msg:        "Update doorlock failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, a)
+	utils.ResponseJson(c, http.StatusOK, dl)
 }
 
-func (h *AreaHandler) DeleteArea(c *gin.Context) {
-	a := &models.Area{}
-	err := c.ShouldBind(a)
+func (h *DoorlockHandler) DeleteDoorlock(c *gin.Context) {
+	dl := &models.Doorlock{}
+	err := c.ShouldBind(dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -114,11 +114,11 @@ func (h *AreaHandler) DeleteArea(c *gin.Context) {
 		return
 	}
 
-	_, err = h.svc.DeleteArea(c.Request.Context(), a)
+	_, err = h.svc.DeleteDoorlock(c.Request.Context(), dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Delete area failed",
+			Msg:        "Delete doorlock failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
