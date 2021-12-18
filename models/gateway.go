@@ -2,17 +2,17 @@ package models
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
+	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"gorm.io/gorm"
 )
 
 type Gateway struct {
 	gorm.Model
-	GatewayID string `gorm:"unique;not null" binding:"required" json:"gatewayId"`
 	AreaID    uint   `json:"areaId"`
-	Name      string `gorm:"unique;not null" binding:"required" json:"name"`
+	GatewayID string `gorm:"unique;not null" json:"gatewayId"`
+	Name      string `gorm:"unique;not null" json:"name"`
 }
 
 type GatewaySvc struct {
@@ -28,19 +28,24 @@ func NewGatewaySvc(db *gorm.DB) *GatewaySvc {
 func (gs *GatewaySvc) FindAllGateway(ctx context.Context) (gwList []Gateway, err error) {
 	result := gs.db.Find(&gwList)
 	if err := result.Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("can't find any record")
-		}
+		err = utils.QueryErrorHandler(err)
 		return nil, err
 	}
 	return gwList, nil
 }
 
+func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id uint) (gw *Gateway, err error) {
+	result := gs.db.First(&gw, id)
+	if err := result.Error; err != nil {
+		err = utils.QueryErrorHandler(err)
+		return nil, err
+	}
+	return gw, nil
+}
+
 func (gs *GatewaySvc) CreateGateway(ctx context.Context, g *Gateway) (*Gateway, error) {
 	if err := gs.db.Create(&g).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("can't find any record")
-		}
+		err = utils.QueryErrorHandler(err)
 		return nil, err
 	}
 	return g, nil
@@ -51,9 +56,7 @@ func (gs *GatewaySvc) UpdateGateway(ctx context.Context, g *Gateway) (*Gateway, 
 	err := result.Error
 	ra := result.RowsAffected
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("can't find any record")
-		}
+		err = utils.QueryErrorHandler(err)
 		return nil, err
 	}
 	if ra > 0 {
@@ -63,14 +66,7 @@ func (gs *GatewaySvc) UpdateGateway(ctx context.Context, g *Gateway) (*Gateway, 
 	}
 }
 
-func (gs *GatewaySvc) DeleteGateway(ctx context.Context, dg *DeleteGateway) (bool, error) {
-	g := convertToDeleteGw(dg)
-	fmt.Println("Delete success", g.GatewayID)
-	if err := gs.db.Unscoped().Where("gateway_id = ?", g.GatewayID).Delete(g).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, fmt.Errorf("can't find any record")
-		}
-		return false, err
-	}
-	return true, nil
+func (gs *GatewaySvc) DeleteGateway(ctx context.Context, g *Gateway) (bool, error) {
+	result := gs.db.Unscoped().Where("id = ?", g.ID).Delete(g)
+	return utils.DeleteResultHandler(result)
 }

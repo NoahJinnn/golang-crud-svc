@@ -26,10 +26,14 @@ func setupRouter(gwHandler *handlers.GatewayHandler, areaHandler *handlers.AreaH
 	v1R := r.Group("/v1")
 	{
 		v1R.GET("/gateways", gwHandler.FindAllGateway)
+		v1R.GET("/gateway/:id", gwHandler.FindGatewayByID)
 		v1R.POST("/gateway", gwHandler.CreateGateway)
 		v1R.PATCH("/gateway", gwHandler.UpdateGateway)
 		v1R.DELETE("/gateway", gwHandler.DeleteGateway)
+		v1R.GET("/areas", areaHandler.FindAllArea)
+		v1R.GET("/area/:id", areaHandler.FindAreaByID)
 		v1R.POST("/area", areaHandler.CreateArea)
+		v1R.DELETE("/area", areaHandler.DeleteArea)
 	}
 	return r
 }
