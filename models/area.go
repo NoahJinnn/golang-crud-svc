@@ -8,11 +8,11 @@ import (
 )
 
 type Area struct {
-	gorm.Model
-	Gateway   Gateway    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	GormModel
+	Gateway   Gateway    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"gateway"`
 	Name      string     `gorm:"unique;not null" json:"name"`
 	Manager   string     `gorm:"unique;not null" json:"manager"`
-	Doorlocks []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Doorlocks []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
 }
 type AreaSvc struct {
 	db *gorm.DB
@@ -50,17 +50,12 @@ func (as *AreaSvc) CreateArea(a *Area, ctx context.Context) (*Area, error) {
 	return a, nil
 }
 
-func (as *AreaSvc) UpdateArea(ctx context.Context, a *Area) (*Area, error) {
+func (as *AreaSvc) UpdateArea(ctx context.Context, a *Area) (bool, error) {
 	result := as.db.Model(&a).Where("id = ?", a.ID).Updates(a)
-	handled, err := utils.UpdateResultHandler(result, a)
-	if err != nil {
-		return nil, err
-	}
-	a = handled.(*Area)
-	return a, nil
+	return utils.ReturnBoolStateFromResult(result)
 }
 
 func (as *AreaSvc) DeleteArea(ctx context.Context, a *Area) (bool, error) {
 	result := as.db.Unscoped().Where("id = ?", a.ID).Delete(a)
-	return utils.DeleteResultHandler(result)
+	return utils.ReturnBoolStateFromResult(result)
 }

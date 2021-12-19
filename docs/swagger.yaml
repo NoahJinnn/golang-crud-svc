@@ -1,0 +1,496 @@
+definitions:
+  models.Area:
+    properties:
+      doorlocks:
+        items:
+          $ref: '#/definitions/models.Doorlock'
+        type: array
+      gateway:
+        $ref: '#/definitions/models.Gateway'
+      id:
+        type: integer
+      manager:
+        type: string
+      name:
+        type: string
+    type: object
+  models.Doorlock:
+    properties:
+      areaId:
+        type: integer
+      description:
+        type: string
+      gatewayId:
+        type: integer
+      id:
+        type: integer
+      lastConnectTime:
+        type: string
+      location:
+        type: string
+      schedulerId:
+        type: integer
+      state:
+        type: string
+    type: object
+  models.Gateway:
+    properties:
+      areaId:
+        type: integer
+      doorlocks:
+        items:
+          $ref: '#/definitions/models.Doorlock'
+        type: array
+      id:
+        type: integer
+      lastConnectTime:
+        type: string
+      macId:
+        type: string
+      name:
+        type: string
+      state:
+        type: string
+    type: object
+  models.SwagCreateArea:
+    properties:
+      gateway:
+        $ref: '#/definitions/models.Gateway'
+      manager:
+        type: string
+      name:
+        type: string
+    type: object
+  models.SwagCreateDoorlock:
+    properties:
+      areaId:
+        type: integer
+      description:
+        type: string
+      gatewayId:
+        type: integer
+      lastConnectTime:
+        type: string
+      location:
+        type: string
+      schedulerId:
+        type: integer
+      state:
+        type: string
+    type: object
+  models.SwagCreateGateway:
+    properties:
+      areaId:
+        type: integer
+      lastConnectTime:
+        type: string
+      macId:
+        type: string
+      name:
+        type: string
+      state:
+        type: string
+    type: object
+  models.SwagUpateGateway:
+    properties:
+      areaId:
+        type: integer
+      id:
+        type: integer
+      lastConnectTime:
+        type: string
+      macId:
+        type: string
+      name:
+        type: string
+      state:
+        type: string
+    type: object
+  models.SwagUpdateArea:
+    properties:
+      gateway:
+        $ref: '#/definitions/models.Gateway'
+      id:
+        type: integer
+      manager:
+        type: string
+      name:
+        type: string
+    type: object
+  models.SwagUpdateDoorlock:
+    properties:
+      areaId:
+        type: integer
+      description:
+        type: string
+      gatewayId:
+        type: integer
+      id:
+        type: integer
+      lastConnectTime:
+        type: string
+      location:
+        type: string
+      schedulerId:
+        type: integer
+      state:
+        type: string
+    type: object
+  utils.ErrorResponse:
+    properties:
+      errorMsg:
+        type: string
+      msg:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /v1/area:
+    delete:
+      consumes:
+      - application/json
+      description: Delete area using "id" field
+      parameters:
+      - description: Area ID
+        in: body
+        name: data
+        required: true
+        schema:
+          allOf:
+          - type: object
+          - properties:
+              id:
+                type: integer
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete Area By ID
+    patch:
+      consumes:
+      - application/json
+      description: Update area, must have "id" field
+      parameters:
+      - description: Fields need to update a area
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.SwagUpdateArea'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update Area By ID
+    post:
+      consumes:
+      - application/json
+      description: Create area
+      parameters:
+      - description: Fields need to create a area
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.SwagCreateArea'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Area'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create Area
+  /v1/area/{id}:
+    get:
+      description: find area and doorlock info by area id
+      parameters:
+      - description: Area ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Area'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Find Area By ID
+  /v1/areas:
+    get:
+      description: find all areas info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.Area'
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Find All Area
+  /v1/doorlock:
+    delete:
+      consumes:
+      - application/json
+      description: Delete doorlock using "id" field
+      parameters:
+      - description: Doorlock ID
+        in: body
+        name: data
+        required: true
+        schema:
+          allOf:
+          - type: object
+          - properties:
+              id:
+                type: integer
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete Doorlock By ID
+    patch:
+      consumes:
+      - application/json
+      description: Update doorlock, must have "id" field
+      parameters:
+      - description: Fields need to update a doorlock
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.SwagUpdateDoorlock'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update Doorlock By ID
+    post:
+      consumes:
+      - application/json
+      description: Create doorlock
+      parameters:
+      - description: Fields need to create a doorlock
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.SwagCreateDoorlock'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Doorlock'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create Doorlock
+  /v1/doorlock/{id}:
+    get:
+      description: find doorlock info by doorlock id
+      parameters:
+      - description: Doorlock ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Doorlock'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Find Doorlock By ID
+  /v1/doorlocks:
+    get:
+      description: find all doorlocks info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.Doorlock'
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Find All Doorlock
+  /v1/gateway:
+    delete:
+      consumes:
+      - application/json
+      description: Delete gateway using "id" field
+      parameters:
+      - description: Gateway ID
+        in: body
+        name: data
+        required: true
+        schema:
+          allOf:
+          - type: object
+          - properties:
+              id:
+                type: integer
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete Gateway By ID
+    patch:
+      consumes:
+      - application/json
+      description: Update gateway, must have "id" field
+      parameters:
+      - description: Fields need to update a gateway
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.SwagUpateGateway'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update Gateway By ID
+    post:
+      consumes:
+      - application/json
+      description: Create gateway
+      parameters:
+      - description: Fields need to create a gateway
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.SwagCreateGateway'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Gateway'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create Gateway
+  /v1/gateway/{id}:
+    get:
+      description: find gateway and doorlock info by gateway id
+      parameters:
+      - description: Gateway ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Gateway'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Find Gateway By ID
+  /v1/gateways:
+    get:
+      description: find all gateways info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.Gateway'
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Find All Gateway
+swagger: "2.0"

@@ -9,7 +9,7 @@ import (
 )
 
 type Doorlock struct {
-	gorm.Model
+	GormModel
 	AreaID          uint      `json:"areaId"`
 	GatewayID       uint      `json:"gatewayId"`
 	SchedulerID     uint      `json:"schedulerId"`
@@ -55,17 +55,12 @@ func (dls *DoorlockSvc) CreateDoorlock(dl *Doorlock, ctx context.Context) (*Door
 	return dl, nil
 }
 
-func (dls *DoorlockSvc) UpdateDoorlock(ctx context.Context, dl *Doorlock) (*Doorlock, error) {
+func (dls *DoorlockSvc) UpdateDoorlock(ctx context.Context, dl *Doorlock) (bool, error) {
 	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Updates(dl)
-	handled, err := utils.UpdateResultHandler(result, dl)
-	if err != nil {
-		return nil, err
-	}
-	dl = handled.(*Doorlock)
-	return dl, nil
+	return utils.ReturnBoolStateFromResult(result)
 }
 
 func (dls *DoorlockSvc) DeleteDoorlock(ctx context.Context, dl *Doorlock) (bool, error) {
 	result := dls.db.Unscoped().Where("id = ?", dl.ID).Delete(dl)
-	return utils.DeleteResultHandler(result)
+	return utils.ReturnBoolStateFromResult(result)
 }

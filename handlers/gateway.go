@@ -19,6 +19,14 @@ func NewGatewayHandler(svc *models.GatewaySvc) *GatewayHandler {
 	}
 }
 
+// Find all gateways and doorlocks info
+// @Summary Find All Gateway
+// @Schemes
+// @Description find all gateways info
+// @Produce json
+// @Success 200 {array} []models.Gateway
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/gateways [get]
 func (h *GatewayHandler) FindAllGateway(c *gin.Context) {
 	gwList, err := h.svc.FindAllGateway(c)
 	if err != nil {
@@ -32,6 +40,15 @@ func (h *GatewayHandler) FindAllGateway(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, gwList)
 }
 
+// Find gateway and doorlock info by id
+// @Summary Find Gateway By ID
+// @Schemes
+// @Description find gateway and doorlock info by gateway id
+// @Produce json
+// @Param        id	path	int	true	"Gateway ID"
+// @Success 200 {object} models.Gateway
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/gateway/{id} [get]
 func (h *GatewayHandler) FindGatewayByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -55,8 +72,20 @@ func (h *GatewayHandler) FindGatewayByID(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, gw)
 }
 
+// Create gateway
+// @Summary Create Gateway
+// @Schemes
+// @Description Create gateway
+// @Accept  json
+// @Produce json
+// @Param	data	body	models.SwagCreateGateway	true	"Fields need to create a gateway"
+// @Success 200 {object} models.Gateway
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/gateway [post]
 func (h *GatewayHandler) CreateGateway(c *gin.Context) {
-	gw := &models.Gateway{}
+	gw := &models.Gateway{
+		State: "disconnect",
+	}
 	err := c.ShouldBind(gw)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -87,6 +116,16 @@ func (h *GatewayHandler) CreateGateway(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, gw)
 }
 
+// Update gateway
+// @Summary Update Gateway By ID
+// @Schemes
+// @Description Update gateway, must have "id" field
+// @Accept  json
+// @Produce json
+// @Param	data	body	models.SwagUpateGateway	true	"Fields need to update a gateway"
+// @Success 200 {boolean} true
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/gateway [patch]
 func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 	gw := &models.Gateway{}
 	err := c.ShouldBind(gw)
@@ -98,8 +137,8 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 		})
 		return
 	}
-	gw, err = h.svc.UpdateGateway(c.Request.Context(), gw)
-	if err != nil {
+	isSuccess, err := h.svc.UpdateGateway(c.Request.Context(), gw)
+	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Msg:        "Update gateway failed",
@@ -107,9 +146,19 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, gw)
+	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
+// Delete gateway
+// @Summary Delete Gateway By ID
+// @Schemes
+// @Description Delete gateway using "id" field
+// @Accept  json
+// @Produce json
+// @Param	data	body	object{id=int}	true	"Gateway ID"
+// @Success 200 {boolean} true
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/gateway [delete]
 func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
 	g := &models.Gateway{}
 	err := c.ShouldBind(g)
@@ -122,8 +171,8 @@ func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
 		return
 	}
 
-	_, err = h.svc.DeleteGateway(c.Request.Context(), g)
-	if err != nil {
+	isSuccess, err := h.svc.DeleteGateway(c.Request.Context(), g)
+	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Msg:        "Delete gateway failed",
@@ -131,6 +180,6 @@ func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, "Delete successfully")
+	utils.ResponseJson(c, http.StatusOK, isSuccess)
 
 }
