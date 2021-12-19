@@ -69,8 +69,8 @@ func (h *GatewayHandler) CreateGateway(c *gin.Context) {
 	if len(gw.MacID) <= 0 || len(gw.Name) <= 0 {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Missing on required fields: name, gateway id",
-			ErrorMsg:   err.Error(),
+			Msg:        "Please fulfill these fields: name, gateway id",
+			ErrorMsg:   "Missing on required fields",
 		})
 		return
 	}

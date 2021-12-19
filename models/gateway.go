@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"gorm.io/gorm"
@@ -9,10 +10,12 @@ import (
 
 type Gateway struct {
 	gorm.Model
-	AreaID    uint       `json:"areaId"`
-	MacID     string     `gorm:"unique;not null" json:"macId"`
-	Name      string     `gorm:"unique;not null" json:"name"`
-	Doorlocks []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	AreaID          uint       `json:"areaId"`
+	MacID           string     `gorm:"unique;not null" json:"macId"`
+	Name            string     `gorm:"unique;not null" json:"name"`
+	LastConnectTime time.Time  `json:"lastConnectTime"`
+	State           string     `gorm:"not null" json:"state"`
+	Doorlocks       []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type GatewaySvc struct {
@@ -26,7 +29,7 @@ func NewGatewaySvc(db *gorm.DB) *GatewaySvc {
 }
 
 func (gs *GatewaySvc) FindAllGateway(ctx context.Context) (gwList []Gateway, err error) {
-	result := gs.db.Find(&gwList)
+	result := gs.db.Preload("Doorlocks").Find(&gwList)
 	if err := result.Error; err != nil {
 		err = utils.QueryErrorHandler(err)
 		return nil, err
@@ -35,7 +38,7 @@ func (gs *GatewaySvc) FindAllGateway(ctx context.Context) (gwList []Gateway, err
 }
 
 func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id uint) (gw *Gateway, err error) {
-	result := gs.db.First(&gw, id)
+	result := gs.db.Preload("Doorlocks").First(&gw, id)
 	if err := result.Error; err != nil {
 		err = utils.QueryErrorHandler(err)
 		return nil, err

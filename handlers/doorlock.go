@@ -56,13 +56,23 @@ func (h *DoorlockHandler) FindDoorlockByID(c *gin.Context) {
 }
 
 func (h *DoorlockHandler) CreateDoorlock(c *gin.Context) {
-	dl := &models.Doorlock{}
+	dl := &models.Doorlock{
+		State: "close",
+	}
 	err := c.ShouldBind(dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Msg:        "Invalid req body",
 			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+	if len(dl.Location) <= 0 {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Please fulfill these fields: location",
+			ErrorMsg:   "Missing on required fields",
 		})
 		return
 	}

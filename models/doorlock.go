@@ -16,7 +16,7 @@ type Doorlock struct {
 	Description     string    `json:"description"`
 	Location        string    `gorm:"unique;not null" json:"location"`
 	LastConnectTime time.Time `json:"lastConnectTime"`
-	State           string    `gorm:"not null"`
+	State           string    `gorm:"not null" json:"state"`
 }
 
 type DoorlockSvc struct {

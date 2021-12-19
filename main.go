@@ -79,6 +79,7 @@ func migrateTable(db *gorm.DB, t interface{}) {
 func migrate(db *gorm.DB) {
 	migrateTable(db, &models.Gateway{})
 	migrateTable(db, &models.Area{})
+	migrateTable(db, &models.Doorlock{})
 }
 
 func main() {
