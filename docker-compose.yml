@@ -11,3 +11,15 @@ services:
         - SA_PASSWORD=Iot@@123
     volumes:
         - ./data:/var/opt/mssql
+  web:
+    restart: unless-stopped
+    depends_on: 
+        - mssql
+    container_name: dms-be
+    image: 'dms-be:latest'
+    ports:
+        - '8080:8080'
+networks:
+    default:
+        external: true
+        name: dms-nw

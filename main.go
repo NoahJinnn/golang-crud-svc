@@ -2,24 +2,27 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/ecoprohcm/DMS_BackendServer/docs"
 	"github.com/ecoprohcm/DMS_BackendServer/handlers"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
-	"github.com/gin-gonic/gin"                 // swagger embed files
+	"github.com/gin-gonic/gin" // swagger embed files
+	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
 
-var (
-	host     = "localhost"
-	port     = "1433"
-	user     = "sa"
-	password = "Iot@@123"
-	database = "DevDB"
-)
+// var (
+// 	host     = "localhost"
+// 	port     = "1433"
+// 	user     = "sa"
+// 	password = "Iot@@123"
+// 	database = "DevDB"
+// )
 
 func setupRouter(
 	gwHandler *handlers.GatewayHandler,
@@ -101,6 +104,17 @@ func initSwagger(r *gin.Engine) {
 }
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASS")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	database := os.Getenv("DB_NAME")
+
 	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", user, password, host, port, database)
 	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
 
