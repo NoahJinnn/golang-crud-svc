@@ -16,79 +16,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// var (
-// 	host     = "localhost"
-// 	port     = "1433"
-// 	user     = "sa"
-// 	password = "Iot@@123"
-// 	database = "DevDB"
-// )
-
-func setupRouter(
-	gwHandler *handlers.GatewayHandler,
-	areaHandler *handlers.AreaHandler,
-	dlHandler *handlers.DoorlockHandler,
-) *gin.Engine {
-	r := gin.Default()
-
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
-	r.Use(CORSMiddleware())
-	v1R := r.Group("/v1")
-	{
-		// Gateway routes
-		v1R.GET("/gateways", gwHandler.FindAllGateway)
-		v1R.GET("/gateway/:id", gwHandler.FindGatewayByID)
-		v1R.POST("/gateway", gwHandler.CreateGateway)
-		v1R.PATCH("/gateway", gwHandler.UpdateGateway)
-		v1R.DELETE("/gateway", gwHandler.DeleteGateway)
-
-		// Area routes
-		v1R.GET("/areas", areaHandler.FindAllArea)
-		v1R.GET("/area/:id", areaHandler.FindAreaByID)
-		v1R.POST("/area", areaHandler.CreateArea)
-		v1R.PATCH("/area", areaHandler.UpdateArea)
-		v1R.DELETE("/area", areaHandler.DeleteArea)
-
-		// Doorlock routes
-		v1R.GET("/doorlocks", dlHandler.FindAllDoorlock)
-		v1R.GET("/doorlock/:id", dlHandler.FindDoorlockByID)
-		v1R.POST("/doorlock", dlHandler.CreateDoorlock)
-		v1R.PATCH("/doorlock", dlHandler.UpdateDoorlock)
-		v1R.DELETE("/doorlock", dlHandler.DeleteDoorlock)
-	}
-	return r
-}
-
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Accept, Origin, Cache-Control, X-Requested-With, User-Agent, Accept-Language, Accept-Encoding")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	}
-}
-
-func migrateTable(db *gorm.DB, t interface{}) {
-	if !db.Migrator().HasTable(t) {
-		db.Migrator().CreateTable(t)
-	}
-}
-
-func migrate(db *gorm.DB) {
-	migrateTable(db, &models.Gateway{})
-	migrateTable(db, &models.Area{})
-	migrateTable(db, &models.Doorlock{})
-}
-
 func initSwagger(r *gin.Engine) {
 	ginSwagger.WrapHandler(swaggerFiles.Handler,
 		ginSwagger.URL("http://localhost:8080/swagger/doc.json"),
@@ -117,7 +44,12 @@ func main() {
 
 	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", user, password, host, port, database)
 	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	migrate(db)
 
+	// DI process
 	gwSvc := models.NewGatewaySvc(db)
 	areaSvc := models.NewAreaSvc(db)
 	dlSvc := models.NewDoorlockSvc(db)
@@ -126,13 +58,10 @@ func main() {
 	areaHdlr := handlers.NewAreaHandler(areaSvc)
 	dlHdlr := handlers.NewDoorlockHandler(dlSvc)
 
-	if err != nil {
-		panic("failed to connect database")
-	}
-	migrate(db)
+	go initMqttClient()
 
+	// HTTP Serve
 	r := setupRouter(gwHdlr, areaHdlr, dlHdlr)
 	initSwagger(r)
-
-	r.Run(":8080")
+	r.Run(":8081")
 }
