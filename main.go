@@ -63,5 +63,5 @@ func main() {
 	// HTTP Serve
 	r := setupRouter(gwHdlr, areaHdlr, dlHdlr)
 	initSwagger(r)
-	r.Run(":8081")
+	r.Run(":8080")
 }

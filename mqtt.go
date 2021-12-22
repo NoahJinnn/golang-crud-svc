@@ -20,7 +20,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 }
 
 func initMqttClient() {
-	var broker = "broker.emqx.io"
+	var broker = "iot.hcmue.space"
 	var port = 1883
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
