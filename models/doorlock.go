@@ -5,14 +5,15 @@ import (
 	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Doorlock struct {
 	GormModel
-	AreaID          uint      `json:"areaId"`
-	GatewayID       uint      `json:"gatewayId"`
-	SchedulerID     uint      `json:"schedulerId"`
+	AreaID          string    `gorm:"type:varchar(256)" json:"areaId"`
+	GatewayID       string    `gorm:"type:varchar(256)" json:"gatewayId"`
+	SchedulerID     string    `gorm:"type:varchar(256)" json:"schedulerId"`
 	Description     string    `json:"description"`
 	Location        string    `gorm:"unique;not null" json:"location"`
 	LastConnectTime time.Time `json:"lastConnectTime"`
@@ -27,6 +28,11 @@ func NewDoorlockSvc(db *gorm.DB) *DoorlockSvc {
 	return &DoorlockSvc{
 		db: db,
 	}
+}
+
+func (dl *Doorlock) BeforeCreate(tx *gorm.DB) (err error) {
+	dl.ID = uuid.New().String()
+	return
 }
 
 func (dls *DoorlockSvc) FindAllDoorlock(ctx context.Context) (dlList []Doorlock, err error) {

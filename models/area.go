@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +23,11 @@ func NewAreaSvc(db *gorm.DB) *AreaSvc {
 	return &AreaSvc{
 		db: db,
 	}
+}
+
+func (a *Area) BeforeCreate(tx *gorm.DB) (err error) {
+	a.ID = uuid.New().String()
+	return
 }
 
 func (as *AreaSvc) FindAllArea(ctx context.Context) (aList []Area, err error) {

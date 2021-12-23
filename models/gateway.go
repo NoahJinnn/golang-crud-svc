@@ -2,15 +2,17 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Gateway struct {
 	GormModel
-	AreaID          uint       `json:"areaId"`
+	AreaID          string     `gorm:"type:varchar(256)" json:"areaId"`
 	MacID           string     `gorm:"unique;not null" json:"macId"`
 	Name            string     `gorm:"unique;not null" json:"name"`
 	LastConnectTime time.Time  `json:"lastConnectTime"`
@@ -26,6 +28,12 @@ func NewGatewaySvc(db *gorm.DB) *GatewaySvc {
 	return &GatewaySvc{
 		db: db,
 	}
+}
+
+func (gw *Gateway) BeforeCreate(tx *gorm.DB) (err error) {
+	gw.ID = uuid.New().String()
+	fmt.Println(gw.ID)
+	return
 }
 
 func (gs *GatewaySvc) FindAllGateway(ctx context.Context) (gwList []Gateway, err error) {
