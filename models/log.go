@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type GatewayLog struct {
-	ID        uint      `gorm:"primarykey"`
+	ID        string    `gorm:"primarykey; type:varchar(256)"`
 	MacID     string    `gorm:"unique; not null" json:"macId"`
 	Type      string    `json:"type"`
 	Content   string    `json:"content"`
@@ -26,20 +27,33 @@ func NewLogSvc(db *gorm.DB) *LogSvc {
 	}
 }
 
-func (gs *GatewaySvc) FindAllGatewayLog(ctx context.Context) (gwList []Gateway, err error) {
-	result := gs.db.Preload("Doorlocks").Find(&gwList)
-	if err := result.Error; err != nil {
-		err = utils.QueryErrorHandler(err)
-		return nil, err
-	}
-	return gwList, nil
+func (l *GatewayLog) BeforeCreate(tx *gorm.DB) (err error) {
+	l.ID = uuid.New().String()
+	return
 }
 
-func (gs *GatewaySvc) FindGatewayLogByID(ctx context.Context, id uint) (gw *Gateway, err error) {
-	result := gs.db.Preload("Doorlocks").First(&gw, id)
+func (ls *LogSvc) FindAllGatewayLog(ctx context.Context) (glList []GatewayLog, err error) {
+	result := ls.db.Find(&glList)
 	if err := result.Error; err != nil {
 		err = utils.QueryErrorHandler(err)
 		return nil, err
 	}
-	return gw, nil
+	return glList, nil
+}
+
+func (ls *LogSvc) FindGatewayLogByID(ctx context.Context, id string) (gl *GatewayLog, err error) {
+	result := ls.db.Preload("Doorlocks").First(&gl, id)
+	if err := result.Error; err != nil {
+		err = utils.QueryErrorHandler(err)
+		return nil, err
+	}
+	return gl, nil
+}
+
+func (ls *LogSvc) CreateGatewayLog(gl *GatewayLog, ctx context.Context) (*GatewayLog, error) {
+	if err := ls.db.Create(&gl).Error; err != nil {
+		err = utils.QueryErrorHandler(err)
+		return nil, err
+	}
+	return gl, nil
 }

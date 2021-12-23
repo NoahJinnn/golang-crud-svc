@@ -44,7 +44,7 @@ func (dls *DoorlockSvc) FindAllDoorlock(ctx context.Context) (dlList []Doorlock,
 	return dlList, nil
 }
 
-func (dls *DoorlockSvc) FindDoorlockByID(ctx context.Context, id uint) (dl *Doorlock, err error) {
+func (dls *DoorlockSvc) FindDoorlockByID(ctx context.Context, id string) (dl *Doorlock, err error) {
 	result := dls.db.First(&dl, id)
 	if err := result.Error; err != nil {
 		err = utils.QueryErrorHandler(err)

@@ -9,6 +9,7 @@ func setupRouter(
 	gwHandler *handlers.GatewayHandler,
 	areaHandler *handlers.AreaHandler,
 	dlHandler *handlers.DoorlockHandler,
+	glHandler *handlers.GatewayLogHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -37,6 +38,10 @@ func setupRouter(
 		v1R.POST("/doorlock", dlHandler.CreateDoorlock)
 		v1R.PATCH("/doorlock", dlHandler.UpdateDoorlock)
 		v1R.DELETE("/doorlock", dlHandler.DeleteDoorlock)
+
+		// Gateway log routes
+		v1R.GET("/gatewayLogs", glHandler.FindAllGatewayLog)
+		v1R.GET("/gatewayLog/:id", glHandler.FindGatewayLogByID)
 	}
 	return r
 }

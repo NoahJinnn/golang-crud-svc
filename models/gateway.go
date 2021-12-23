@@ -45,7 +45,7 @@ func (gs *GatewaySvc) FindAllGateway(ctx context.Context) (gwList []Gateway, err
 	return gwList, nil
 }
 
-func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id uint) (gw *Gateway, err error) {
+func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id string) (gw *Gateway, err error) {
 	result := gs.db.Preload("Doorlocks").First(&gw, id)
 	if err := result.Error; err != nil {
 		err = utils.QueryErrorHandler(err)

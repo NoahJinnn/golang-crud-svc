@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/ecoprohcm/DMS_BackendServer/models"
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
@@ -45,22 +44,14 @@ func (h *DoorlockHandler) FindAllDoorlock(c *gin.Context) {
 // @Schemes
 // @Description find doorlock info by doorlock id
 // @Produce json
-// @Param        id	path	int	true	"Doorlock ID"
+// @Param        id	path	string	true	"Doorlock ID"
 // @Success 200 {object} models.Doorlock
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/doorlock/{id} [get]
 func (h *DoorlockHandler) FindDoorlockByID(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := strconv.ParseUint(idParam, 10, 32)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Invalid req id",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
-	dl, err := h.svc.FindDoorlockByID(c, uint(id))
+	id := c.Param("id")
+
+	dl, err := h.svc.FindDoorlockByID(c, id)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

@@ -53,15 +53,17 @@ func main() {
 	gwSvc := models.NewGatewaySvc(db)
 	areaSvc := models.NewAreaSvc(db)
 	dlSvc := models.NewDoorlockSvc(db)
+	glSvc := models.NewLogSvc(db)
 
 	gwHdlr := handlers.NewGatewayHandler(gwSvc)
 	areaHdlr := handlers.NewAreaHandler(areaSvc)
 	dlHdlr := handlers.NewDoorlockHandler(dlSvc)
+	glHdlr := handlers.NewGatewayLogHandler(glSvc)
 
 	go initMqttClient()
 
 	// HTTP Serve
-	r := setupRouter(gwHdlr, areaHdlr, dlHdlr)
+	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr)
 	initSwagger(r)
 	r.Run(":8080")
 }

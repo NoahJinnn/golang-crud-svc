@@ -39,7 +39,7 @@ func (as *AreaSvc) FindAllArea(ctx context.Context) (aList []Area, err error) {
 	return aList, nil
 }
 
-func (as *AreaSvc) FindAreaByID(ctx context.Context, id uint) (a *Area, err error) {
+func (as *AreaSvc) FindAreaByID(ctx context.Context, id string) (a *Area, err error) {
 	result := as.db.Preload("Doorlocks").First(&a, id)
 	if err := result.Error; err != nil {
 		err = utils.QueryErrorHandler(err)

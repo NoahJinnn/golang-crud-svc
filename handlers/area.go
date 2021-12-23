@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/ecoprohcm/DMS_BackendServer/models"
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
@@ -45,22 +44,14 @@ func (h *AreaHandler) FindAllArea(c *gin.Context) {
 // @Schemes
 // @Description find area and doorlock info by area id
 // @Produce json
-// @Param        id	path	int	true	"Area ID"
+// @Param        id	path	string	true	"Area ID"
 // @Success 200 {object} models.Area
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/area/{id} [get]
 func (h *AreaHandler) FindAreaByID(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := strconv.ParseUint(idParam, 10, 32)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Invalid req id",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
-	a, err := h.svc.FindAreaByID(c, uint(id))
+	id := c.Param("id")
+
+	a, err := h.svc.FindAreaByID(c, id)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
