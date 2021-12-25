@@ -12,8 +12,9 @@ import (
 type GatewayLog struct {
 	ID        string    `gorm:"primarykey; type:varchar(256)"`
 	MacID     string    `gorm:"unique; not null" json:"macId"`
-	Type      string    `json:"type"`
+	LogType   string    `json:"logType"`
 	Content   string    `json:"content"`
+	LogTime   string    `json:"logTime"`
 	CreatedAt time.Time `swaggerignore:"true"`
 }
 

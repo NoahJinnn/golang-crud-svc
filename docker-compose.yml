@@ -12,6 +12,7 @@ services:
         volumes:
             - ./data:/var/opt/mssql
     emqx:
+        container_name: mqtt-broker
         image: emqx/emqx:latest
         environment:
             - "EMQX_NAME=emqx"

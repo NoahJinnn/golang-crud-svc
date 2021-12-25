@@ -38,7 +38,7 @@ func main() {
 
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASS")
-	host := os.Getenv("DB_HOST")
+	host := os.Getenv("SERVER_HOST")
 	port := os.Getenv("DB_PORT")
 	database := os.Getenv("DB_NAME")
 
@@ -60,7 +60,9 @@ func main() {
 	dlHdlr := handlers.NewDoorlockHandler(dlSvc)
 	glHdlr := handlers.NewGatewayLogHandler(glSvc)
 
-	go initMqttClient()
+	mqttHost := os.Getenv("SERVER_HOST")
+	mqttPort := os.Getenv("MQTT_PORT")
+	go initMqttClient(mqttHost, mqttPort, glSvc)
 
 	// HTTP Serve
 	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr)
