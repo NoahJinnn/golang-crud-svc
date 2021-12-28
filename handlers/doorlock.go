@@ -3,18 +3,22 @@ package handlers
 import (
 	"net/http"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
+	"github.com/ecoprohcm/DMS_BackendServer/mqttSvc"
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type DoorlockHandler struct {
-	svc *models.DoorlockSvc
+	svc  *models.DoorlockSvc
+	mqtt mqtt.Client
 }
 
-func NewDoorlockHandler(svc *models.DoorlockSvc) *DoorlockHandler {
+func NewDoorlockHandler(svc *models.DoorlockSvc, mqtt mqtt.Client) *DoorlockHandler {
 	return &DoorlockHandler{
-		svc: svc,
+		svc:  svc,
+		mqtt: mqtt,
 	}
 }
 
@@ -94,7 +98,7 @@ func (h *DoorlockHandler) CreateDoorlock(c *gin.Context) {
 		})
 		return
 	}
-	dl, err = h.svc.CreateDoorlock(dl, c.Request.Context())
+	dl, err = h.svc.CreateDoorlock(c.Request.Context(), dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -128,6 +132,17 @@ func (h *DoorlockHandler) UpdateDoorlock(c *gin.Context) {
 		})
 		return
 	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_DOORLOCK_U, 1, false, mqttSvc.ServerUpdateDoorlockPayload(dl))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update doorlock state failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	isSuccess, err := h.svc.UpdateDoorlock(c.Request.Context(), dl)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -138,6 +153,42 @@ func (h *DoorlockHandler) UpdateDoorlock(c *gin.Context) {
 		return
 	}
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
+}
+
+// Update doorlock state
+// @Summary Update Doorlock State By ID
+// @Schemes
+// @Description Update doorlock state, must have "id" field
+// @Accept  json
+// @Produce json
+// @Param	data	body	models.DoorlockCmd	true	"Fields need to update a doorlock state"
+// @Success 200 {boolean} true
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/doorlock/state [patch]
+func (h *DoorlockHandler) UpdateDoorlockCmd(c *gin.Context) {
+	dl := &models.DoorlockCmd{}
+	err := c.ShouldBind(dl)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Invalid req body",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	t := h.mqtt.Publish(string(mqttSvc.TOPIC_SV_DOORLOCK_CMD), 1, false, mqttSvc.ServerCmdDoorlockPayload(dl.ID, dl.Command))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Execute doorlock command failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	// utils.ResponseJson(c, http.StatusOK, isSuccess)
+
 }
 
 // Delete doorlock

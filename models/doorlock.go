@@ -20,6 +20,11 @@ type Doorlock struct {
 	State           string    `gorm:"not null" json:"state"`
 }
 
+type DoorlockCmd struct {
+	ID      string `json:"id"`
+	Command string `json:"cmd"`
+}
+
 type DoorlockSvc struct {
 	db *gorm.DB
 }
@@ -53,7 +58,7 @@ func (dls *DoorlockSvc) FindDoorlockByID(ctx context.Context, id string) (dl *Do
 	return dl, nil
 }
 
-func (dls *DoorlockSvc) CreateDoorlock(dl *Doorlock, ctx context.Context) (*Doorlock, error) {
+func (dls *DoorlockSvc) CreateDoorlock(ctx context.Context, dl *Doorlock) (*Doorlock, error) {
 	if err := dls.db.Create(&dl).Error; err != nil {
 		err = utils.QueryErrorHandler(err)
 		return nil, err
@@ -65,6 +70,11 @@ func (dls *DoorlockSvc) UpdateDoorlock(ctx context.Context, dl *Doorlock) (bool,
 	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Updates(dl)
 	return utils.ReturnBoolStateFromResult(result)
 }
+
+// func (dls *DoorlockSvc) UpdateDoorlockCmd(ctx context.Context, dl *DoorlockCmd) (bool, error) {
+// 	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Update("state", dl.Command)
+// 	return utils.ReturnBoolStateFromResult(result)
+// }
 
 func (dls *DoorlockSvc) DeleteDoorlock(ctx context.Context, dl *Doorlock) (bool, error) {
 	result := dls.db.Unscoped().Where("id = ?", dl.ID).Delete(dl)

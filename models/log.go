@@ -51,7 +51,7 @@ func (ls *LogSvc) FindGatewayLogByID(ctx context.Context, id string) (gl *Gatewa
 	return gl, nil
 }
 
-func (ls *LogSvc) CreateGatewayLog(gl *GatewayLog, ctx context.Context) (*GatewayLog, error) {
+func (ls *LogSvc) CreateGatewayLog(ctx context.Context, gl *GatewayLog) (*GatewayLog, error) {
 	if err := ls.db.Create(&gl).Error; err != nil {
 		err = utils.QueryErrorHandler(err)
 		return nil, err

@@ -37,6 +37,7 @@ func setupRouter(
 		v1R.GET("/doorlock/:id", dlHandler.FindDoorlockByID)
 		v1R.POST("/doorlock", dlHandler.CreateDoorlock)
 		v1R.PATCH("/doorlock", dlHandler.UpdateDoorlock)
+		v1R.PATCH("/doorlock/cmd", dlHandler.UpdateDoorlockCmd)
 		v1R.DELETE("/doorlock", dlHandler.DeleteDoorlock)
 
 		// Gateway log routes

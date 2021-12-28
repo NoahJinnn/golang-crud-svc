@@ -8,6 +8,7 @@ import (
 	"github.com/ecoprohcm/DMS_BackendServer/docs"
 	"github.com/ecoprohcm/DMS_BackendServer/handlers"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
+	"github.com/ecoprohcm/DMS_BackendServer/mqttSvc"
 	"github.com/gin-gonic/gin" // swagger embed files
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
@@ -25,7 +26,7 @@ func initSwagger(r *gin.Engine) {
 	docs.SwaggerInfo.Title = "DMS Backend API"
 	// docs.SwaggerInfo.Version = "2.0"
 	docs.SwaggerInfo.Description = "This is DMS backend server"
-	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Host = "http://iot.hcmue.space:8002"
 	docs.SwaggerInfo.BasePath = "/v1"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
@@ -55,17 +56,19 @@ func main() {
 	dlSvc := models.NewDoorlockSvc(db)
 	glSvc := models.NewLogSvc(db)
 
-	gwHdlr := handlers.NewGatewayHandler(gwSvc)
-	areaHdlr := handlers.NewAreaHandler(areaSvc)
-	dlHdlr := handlers.NewDoorlockHandler(dlSvc)
-	glHdlr := handlers.NewGatewayLogHandler(glSvc)
-
 	mqttHost := os.Getenv("SERVER_HOST")
 	mqttPort := os.Getenv("MQTT_PORT")
-	go initMqttClient(mqttHost, mqttPort, glSvc)
+
+	mqttClient := mqttSvc.MqttClient(mqttHost, mqttPort, glSvc, dlSvc)
+
+	gwHdlr := handlers.NewGatewayHandler(gwSvc)
+	areaHdlr := handlers.NewAreaHandler(areaSvc)
+	dlHdlr := handlers.NewDoorlockHandler(dlSvc, mqttClient)
+	glHdlr := handlers.NewGatewayLogHandler(glSvc)
 
 	// HTTP Serve
 	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr)
 	initSwagger(r)
 	r.Run(":8080")
+	mqttClient.Disconnect(250)
 }
