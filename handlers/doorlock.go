@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
@@ -137,7 +139,7 @@ func (h *DoorlockHandler) UpdateDoorlock(c *gin.Context) {
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update doorlock state failed",
+			Msg:        "Update doorlock mqtt failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -187,8 +189,16 @@ func (h *DoorlockHandler) UpdateDoorlockCmd(c *gin.Context) {
 		return
 	}
 
-	// utils.ResponseJson(c, http.StatusOK, isSuccess)
-
+	isMqttReps := waitForMqttDoorlockResponse(c, 60)
+	if !isMqttReps {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Mqtt response is too long",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+	utils.ResponseJson(c, http.StatusOK, true)
 }
 
 // Delete doorlock
@@ -213,6 +223,26 @@ func (h *DoorlockHandler) DeleteDoorlock(c *gin.Context) {
 		return
 	}
 
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_DOORLOCK_D, 1, false, mqttSvc.ServerDeleteDoorlockPayload(dl))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Delete doorlock mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	isMqttReps := waitForMqttDoorlockResponse(c, 60)
+	if !isMqttReps {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Mqtt response is too long",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	isSuccess, err := h.svc.DeleteDoorlock(c.Request.Context(), dl)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -224,4 +254,24 @@ func (h *DoorlockHandler) DeleteDoorlock(c *gin.Context) {
 	}
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 
+}
+
+func waitForMqttDoorlockResponse(c *gin.Context, waitSecond uint) bool {
+	// Clear previous check read state
+	select {
+	case <-mqttSvc.DoorlockStateCheck:
+		fmt.Println("[MQTT-INFO] Clear doorlock state check flag")
+	default:
+	}
+
+	for start := time.Now(); time.Since(start) < time.Duration(waitSecond)*time.Second; {
+		select {
+		case <-mqttSvc.DoorlockStateCheck:
+			return true
+		default:
+			fmt.Println("[MQTT-INFO] Checking doorlock state from mqtt")
+
+		}
+	}
+	return false
 }

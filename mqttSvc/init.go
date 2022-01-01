@@ -5,19 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
 	"github.com/tidwall/gjson"
 )
 
-const (
-	TOPIC_GW_LOG_C        string = "gateway/log/create"
-	TOPIC_SV_DOORLOCK_R   string = "server/doorlock/read"
-	TOPIC_SV_DOORLOCK_U   string = "server/doorlock/update"
-	TOPIC_SV_DOORLOCK_CMD string = "server/doorlock/cmd"
-)
+var DoorlockStateCheck = make(chan bool)
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
@@ -31,7 +25,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	fmt.Printf("Connect lost: %v", err)
 }
 
-func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc) mqtt.Client {
+func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc) mqtt.Client {
 
 	mqtt.ERROR = log.New(os.Stdout, "[MQTT-ERROR] ", 0)
 	mqtt.CRITICAL = log.New(os.Stdout, "[MQTT-CRIT] ", 0)
@@ -52,15 +46,66 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
-	subGateway(client, logSvc, doorlockSvc)
-	publishTest(client)
+	subGateway(client, logSvc, doorlockSvc, gwSvc)
 
 	// client.Disconnect(250)
 	return client
 }
 
-func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc) {
-	t := client.Subscribe(string(TOPIC_GW_LOG_C), 1, func(client mqtt.Client, msg mqtt.Message) {
+func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc) {
+
+	t := client.Subscribe(string(TOPIC_GW_SHUTDOWN), 1, func(client mqtt.Client, msg mqtt.Message) {
+		var payloadStr = string(msg.Payload())
+		macId := gjson.Get(payloadStr, "mac_id")
+		gwMsg := gjson.Get(payloadStr, "message")
+		fmt.Printf("[MQTT-INFO] Gateway %s is shutdown with message: %s", macId, gwMsg)
+		gw := &models.Gateway{
+			MacID: macId.String(),
+		}
+		gwSvc.DeleteGatewayByMacId(context.Background(), gw)
+	})
+
+	if err := HandleMqttErr(&t); err == nil {
+		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_SHUTDOWN)
+	}
+
+	t = client.Subscribe(string(TOPIC_GW_BOOTUP), 1, func(client mqtt.Client, msg mqtt.Message) {
+		var payloadStr = string(msg.Payload())
+		macId := gjson.Get(payloadStr, "mac_id")
+		users := gjson.Get(payloadStr, "message.users")
+		if users.Exists() {
+			for _, v := range users.Array() {
+				fmt.Printf("%s %s", v.Get("name"), v.Get("age"))
+			}
+		}
+
+		doorlocks := gjson.Get(payloadStr, "message.doorlocks")
+		if doorlocks.Exists() {
+			for _, v := range doorlocks.Array() {
+				doorID := v.Get("door_id")
+				dl, _ := doorlockSvc.FindDoorlockByID(context.Background(), doorID.String())
+				if dl == nil {
+					location := v.Get("location")
+					dl = &models.Doorlock{
+						State:     "Close",
+						Location:  location.String(),
+						GatewayID: macId.String(),
+					}
+					dl.ID = doorID.Str
+					doorlockSvc.CreateDoorlock(context.Background(), dl)
+				} else {
+					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, macId.Str)
+				}
+			}
+		}
+
+	})
+
+	if err := HandleMqttErr(&t); err == nil {
+		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_BOOTUP)
+	}
+
+	t = client.Subscribe(string(TOPIC_GW_LOG_C), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
 		macId := gjson.Get(payloadStr, "macId")
 		logType := gjson.Get(payloadStr, "logType")
@@ -75,40 +120,68 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 		})
 	})
 
-	t = client.Subscribe(string(TOPIC_SV_DOORLOCK_R), 1, func(client mqtt.Client, msg mqtt.Message) {
-		var payloadStr = string(msg.Payload())
-		doorId := gjson.Get(payloadStr, "door_id")
-		description := gjson.Get(payloadStr, "description")
-		location := gjson.Get(payloadStr, "location")
-		state := gjson.Get(payloadStr, "state")
-		fmt.Printf(" %s: %s \n", msg.Topic(), payloadStr)
-
-		dl := &models.Doorlock{
-			Description: description.String(),
-			Location:    location.String(),
-			State:       state.String(),
-		}
-		dl.ID = doorId.String()
-		doorlockSvc.UpdateDoorlock(context.Background(), dl)
-	})
-
-	// Test only
-	t = client.Subscribe(string(TOPIC_SV_DOORLOCK_CMD), 1, func(client mqtt.Client, msg mqtt.Message) {
-		var payloadStr = string(msg.Payload())
-		fmt.Printf(" %s: %s \n", msg.Topic(), payloadStr)
-	})
-
 	if err := HandleMqttErr(&t); err == nil {
 		fmt.Printf("Subscribed to topic %s", TOPIC_GW_LOG_C)
 	}
+
+	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_STATUS), 1, func(client mqtt.Client, msg mqtt.Message) {
+		var payloadStr = string(msg.Payload())
+		status := gjson.Get(payloadStr, "status")
+		action := gjson.Get(payloadStr, "action")
+		fmt.Printf("[MQTT-INFO] Action %s is %s", action, status)
+
+		DoorlockStateCheck <- true
+	})
+
+	if err := HandleMqttErr(&t); err == nil {
+		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_DOORLOCK_STATUS)
+	}
+
+	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_U), 1, func(client mqtt.Client, msg mqtt.Message) {
+		dl := parseDoorlockPayload(msg)
+		doorlockSvc.UpdateDoorlock(context.Background(), dl)
+		DoorlockStateCheck <- true
+	})
+
+	if err := HandleMqttErr(&t); err == nil {
+		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_DOORLOCK_U)
+	}
+
+	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_C), 1, func(client mqtt.Client, msg mqtt.Message) {
+		dl := parseDoorlockPayload(msg)
+		doorlockSvc.CreateDoorlock(context.Background(), dl)
+	})
+
+	if err := HandleMqttErr(&t); err == nil {
+		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_DOORLOCK_C)
+	}
+
+	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_D), 1, func(client mqtt.Client, msg mqtt.Message) {
+		var payloadStr = string(msg.Payload())
+		doorId := gjson.Get(payloadStr, "door_id")
+		dl := &models.Doorlock{}
+		dl.ID = doorId.String()
+		doorlockSvc.DeleteDoorlock(context.Background(), dl)
+	})
+
+	if err := HandleMqttErr(&t); err == nil {
+		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_DOORLOCK_D)
+	}
 }
 
-func publishTest(client mqtt.Client) {
-	num := 10
-	for i := 0; i < num; i++ {
-		json := fmt.Sprintf(`{"macId":%d,"logType":"SUCCESS","content": "Unlock door", "logTime": "198273198237"}`, i)
-		t := client.Publish(string(TOPIC_GW_LOG_C), 1, false, json)
-		go HandleMqttErr(&t)
-		time.Sleep(time.Second)
+func parseDoorlockPayload(msg mqtt.Message) *models.Doorlock {
+	var payloadStr = string(msg.Payload())
+	doorId := gjson.Get(payloadStr, "door_id")
+	description := gjson.Get(payloadStr, "description")
+	location := gjson.Get(payloadStr, "location")
+	state := gjson.Get(payloadStr, "state")
+	fmt.Printf(" %s: %s \n", msg.Topic(), payloadStr)
+
+	dl := &models.Doorlock{
+		Description: description.String(),
+		Location:    location.String(),
+		State:       state.String(),
 	}
+	dl.ID = doorId.String()
+	return dl
 }

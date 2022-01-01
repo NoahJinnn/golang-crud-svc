@@ -59,9 +59,9 @@ func main() {
 	mqttHost := os.Getenv("SERVER_HOST")
 	mqttPort := os.Getenv("MQTT_PORT")
 
-	mqttClient := mqttSvc.MqttClient(mqttHost, mqttPort, glSvc, dlSvc)
+	mqttClient := mqttSvc.MqttClient(mqttHost, mqttPort, glSvc, dlSvc, gwSvc)
 
-	gwHdlr := handlers.NewGatewayHandler(gwSvc)
+	gwHdlr := handlers.NewGatewayHandler(gwSvc, mqttClient)
 	areaHdlr := handlers.NewAreaHandler(areaSvc)
 	dlHdlr := handlers.NewDoorlockHandler(dlSvc, mqttClient)
 	glHdlr := handlers.NewGatewayLogHandler(glSvc)

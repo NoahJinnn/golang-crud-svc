@@ -72,3 +72,8 @@ func (gs *GatewaySvc) DeleteGateway(ctx context.Context, g *Gateway) (bool, erro
 	result := gs.db.Unscoped().Where("id = ?", g.ID).Delete(g)
 	return utils.ReturnBoolStateFromResult(result)
 }
+
+func (gs *GatewaySvc) DeleteGatewayByMacId(ctx context.Context, g *Gateway) (bool, error) {
+	result := gs.db.Unscoped().Where("mac_id = ?", g.MacID).Delete(g)
+	return utils.ReturnBoolStateFromResult(result)
+}

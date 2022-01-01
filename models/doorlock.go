@@ -22,7 +22,7 @@ type Doorlock struct {
 
 type DoorlockCmd struct {
 	ID      string `json:"id"`
-	Command string `json:"cmd"`
+	Command string `json:"command"`
 }
 
 type DoorlockSvc struct {
@@ -71,10 +71,10 @@ func (dls *DoorlockSvc) UpdateDoorlock(ctx context.Context, dl *Doorlock) (bool,
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-// func (dls *DoorlockSvc) UpdateDoorlockCmd(ctx context.Context, dl *DoorlockCmd) (bool, error) {
-// 	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Update("state", dl.Command)
-// 	return utils.ReturnBoolStateFromResult(result)
-// }
+func (dls *DoorlockSvc) UpdateDoorlockGateway(ctx context.Context, dl *Doorlock, gwID string) (bool, error) {
+	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Update("gateway_id", gwID)
+	return utils.ReturnBoolStateFromResult(result)
+}
 
 func (dls *DoorlockSvc) DeleteDoorlock(ctx context.Context, dl *Doorlock) (bool, error) {
 	result := dls.db.Unscoped().Where("id = ?", dl.ID).Delete(dl)

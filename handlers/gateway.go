@@ -3,18 +3,22 @@ package handlers
 import (
 	"net/http"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
+	"github.com/ecoprohcm/DMS_BackendServer/mqttSvc"
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type GatewayHandler struct {
-	svc *models.GatewaySvc
+	svc  *models.GatewaySvc
+	mqtt mqtt.Client
 }
 
-func NewGatewayHandler(svc *models.GatewaySvc) *GatewayHandler {
+func NewGatewayHandler(svc *models.GatewaySvc, mqtt mqtt.Client) *GatewayHandler {
 	return &GatewayHandler{
-		svc: svc,
+		svc:  svc,
+		mqtt: mqtt,
 	}
 }
 
@@ -128,6 +132,17 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 		})
 		return
 	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_GATEWAY_U, 1, false, mqttSvc.ServerUpdateGatewayPayload(gw))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update gateway mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	isSuccess, err := h.svc.UpdateGateway(c.Request.Context(), gw)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
