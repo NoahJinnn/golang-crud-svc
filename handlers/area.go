@@ -94,7 +94,6 @@ func (h *AreaHandler) CreateArea(c *gin.Context) {
 		return
 	}
 	utils.ResponseJson(c, http.StatusOK, a)
-
 }
 
 // Update area

@@ -40,3 +40,15 @@ type SwagUpdateDoorlock struct {
 	GormModel
 	SwagCreateDoorlock
 }
+
+type SwagCreatePassword struct {
+	UserID       string `json:"userId"`
+	PasswordType string `json:"passwordType"`
+	PasswordHash string `json:"passwordHash"`
+}
+
+type SwagUpdatePassword struct {
+	GormModel
+	PasswordType string `json:"passwordType"`
+	PasswordHash string `json:"passwordHash"`
+}

@@ -14,4 +14,8 @@ const (
 	TOPIC_SV_DOORLOCK_U   string = "server/doorlock/update"
 	TOPIC_SV_DOORLOCK_D   string = "server/doorlock/delete"
 	TOPIC_SV_GATEWAY_U    string = "server/gateway/update"
+
+	TOPIC_SV_PASSWORD_C string = "server/password/create"
+	TOPIC_SV_PASSWORD_U string = "server/password/update"
+	TOPIC_SV_PASSWORD_D string = "server/password/delete"
 )

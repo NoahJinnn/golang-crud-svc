@@ -48,7 +48,6 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 	}
 	subGateway(client, logSvc, doorlockSvc, gwSvc)
 
-	// client.Disconnect(250)
 	return client
 }
 

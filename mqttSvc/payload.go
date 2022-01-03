@@ -21,3 +21,15 @@ func ServerCmdDoorlockPayload(doorlockId string, cmd string) string {
 func ServerUpdateGatewayPayload(gw *models.Gateway) string {
 	return fmt.Sprintf(`{"gateway_id":%s,"area_id":%s,"name":%s, "state":%s}`, gw.ID, gw.AreaID, gw.Name, gw.State)
 }
+
+func ServerCreatePasswordPayload(pw *models.Password) string {
+	return fmt.Sprintf(`{"user_id":%s,"password_id":%s,"password_type":%s,"password_hash":%s}`, pw.UserID, pw.ID, pw.PasswordType, pw.PasswordHash)
+}
+
+func ServerUpdatePasswordPayload(pw *models.Password) string {
+	return fmt.Sprintf(`{"password_id":%s,"password_type":%s,"password_hash":%s}`, pw.ID, pw.PasswordType, pw.PasswordHash)
+}
+
+func ServerDeletePasswordPayload(pw *models.Password) string {
+	return fmt.Sprintf(`{"password_id":%s}`, pw.ID)
+}
