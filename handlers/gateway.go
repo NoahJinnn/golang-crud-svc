@@ -166,8 +166,8 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/gateway [delete]
 func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
-	g := &models.Gateway{}
-	err := c.ShouldBind(g)
+	dId := &models.DeleteID{}
+	err := c.ShouldBind(dId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -177,7 +177,7 @@ func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteGateway(c.Request.Context(), g)
+	isSuccess, err := h.svc.DeleteGateway(c.Request.Context(), dId.ID)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

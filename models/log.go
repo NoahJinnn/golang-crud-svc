@@ -5,12 +5,11 @@ import (
 	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type GatewayLog struct {
-	ID        string    `gorm:"primarykey; type:varchar(256)"`
+	ID        uint      `gorm:"primarykey;`
 	MacID     string    `gorm:"unique; not null" json:"macId"`
 	LogType   string    `json:"logType"`
 	Content   string    `json:"content"`
@@ -28,15 +27,10 @@ func NewLogSvc(db *gorm.DB) *LogSvc {
 	}
 }
 
-func (l *GatewayLog) BeforeCreate(tx *gorm.DB) (err error) {
-	l.ID = uuid.New().String()
-	return
-}
-
 func (ls *LogSvc) FindAllGatewayLog(ctx context.Context) (glList []GatewayLog, err error) {
 	result := ls.db.Find(&glList)
 	if err := result.Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return glList, nil
@@ -45,7 +39,7 @@ func (ls *LogSvc) FindAllGatewayLog(ctx context.Context) (glList []GatewayLog, e
 func (ls *LogSvc) FindGatewayLogByID(ctx context.Context, id string) (gl *GatewayLog, err error) {
 	result := ls.db.Preload("Doorlocks").First(&gl, id)
 	if err := result.Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return gl, nil
@@ -53,7 +47,7 @@ func (ls *LogSvc) FindGatewayLogByID(ctx context.Context, id string) (gl *Gatewa
 
 func (ls *LogSvc) CreateGatewayLog(ctx context.Context, gl *GatewayLog) (*GatewayLog, error) {
 	if err := ls.db.Create(&gl).Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return gl, nil

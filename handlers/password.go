@@ -55,7 +55,7 @@ func (h *PasswordHandler) FindAllPasswordByUserID(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/password [post]
 func (h *PasswordHandler) CreatePassword(c *gin.Context) {
-	pw := &models.Password{}
+	pw := &models.PasswordCreate{}
 	err := c.ShouldBind(pw)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -66,7 +66,7 @@ func (h *PasswordHandler) CreatePassword(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_PASSWORD_D, 1, false, mqttSvc.ServerCreatePasswordPayload(pw))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_PASSWORD_C, 1, false, mqttSvc.ServerCreatePasswordPayload(pw))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -76,7 +76,7 @@ func (h *PasswordHandler) CreatePassword(c *gin.Context) {
 		return
 	}
 
-	pw, err = h.svc.CreatePassword(c.Request.Context(), pw)
+	_, err = h.svc.CreatePassword(c.Request.Context(), &pw.Password)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -85,7 +85,7 @@ func (h *PasswordHandler) CreatePassword(c *gin.Context) {
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, pw)
+	utils.ResponseJson(c, http.StatusOK, &pw.Password)
 }
 
 // Update password
@@ -99,7 +99,7 @@ func (h *PasswordHandler) CreatePassword(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/password [patch]
 func (h *PasswordHandler) UpdatePassword(c *gin.Context) {
-	pw := &models.Password{}
+	pw := &models.PasswordCreate{}
 	err := c.ShouldBind(pw)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -120,7 +120,7 @@ func (h *PasswordHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.UpdatePassword(c.Request.Context(), pw)
+	isSuccess, err := h.svc.UpdatePassword(c.Request.Context(), &pw.Password)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -143,7 +143,7 @@ func (h *PasswordHandler) UpdatePassword(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/password [delete]
 func (h *PasswordHandler) DeletePassword(c *gin.Context) {
-	pw := &models.Password{}
+	pw := &models.PasswordCreate{}
 	err := c.ShouldBind(pw)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -164,7 +164,7 @@ func (h *PasswordHandler) DeletePassword(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeletePassword(c.Request.Context(), pw)
+	isSuccess, err := h.svc.DeletePassword(c.Request.Context(), &pw.Password)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

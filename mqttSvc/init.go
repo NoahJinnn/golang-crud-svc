@@ -90,7 +90,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 						Location:  location.String(),
 						GatewayID: macId.String(),
 					}
-					dl.ID = doorID.Str
+					dl.ID = uint(doorID.Uint())
 					doorlockSvc.CreateDoorlock(context.Background(), dl)
 				} else {
 					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, macId.Str)
@@ -158,9 +158,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_D), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
 		doorId := gjson.Get(payloadStr, "door_id")
-		dl := &models.Doorlock{}
-		dl.ID = doorId.String()
-		doorlockSvc.DeleteDoorlock(context.Background(), dl)
+		doorlockSvc.DeleteDoorlock(context.Background(), uint(doorId.Uint()))
 	})
 
 	if err := HandleMqttErr(&t); err == nil {
@@ -181,6 +179,6 @@ func parseDoorlockPayload(msg mqtt.Message) *models.Doorlock {
 		Location:    location.String(),
 		State:       state.String(),
 	}
-	dl.ID = doorId.String()
+	dl.ID = uint(doorId.Uint())
 	return dl
 }

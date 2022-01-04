@@ -140,8 +140,8 @@ func (h *AreaHandler) UpdateArea(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/area [delete]
 func (h *AreaHandler) DeleteArea(c *gin.Context) {
-	a := &models.Area{}
-	err := c.ShouldBind(a)
+	dId := &models.DeleteID{}
+	err := c.ShouldBind(dId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -151,7 +151,7 @@ func (h *AreaHandler) DeleteArea(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteArea(c.Request.Context(), a)
+	isSuccess, err := h.svc.DeleteArea(c.Request.Context(), dId.ID)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

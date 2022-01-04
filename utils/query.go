@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func QueryErrorHandler(err error) error {
+func HandleQueryError(err error) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return fmt.Errorf("can't find any record")
 	}
@@ -18,7 +18,7 @@ func ReturnBoolStateFromResult(result *gorm.DB) (bool, error) {
 	err := result.Error
 	ra := result.RowsAffected
 	if err != nil {
-		err = QueryErrorHandler(err)
+		err = HandleQueryError(err)
 		return false, err
 	}
 	if ra > 0 {

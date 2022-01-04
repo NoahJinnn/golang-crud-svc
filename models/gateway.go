@@ -2,17 +2,15 @@ package models
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Gateway struct {
 	GormModel
-	AreaID          string     `gorm:"type:varchar(256)" json:"areaId"`
+	AreaID          uint       `json:"areaId"`
 	MacID           string     `gorm:"unique;not null" json:"macId"`
 	Name            string     `gorm:"unique;not null" json:"name"`
 	LastConnectTime time.Time  `json:"lastConnectTime"`
@@ -30,16 +28,10 @@ func NewGatewaySvc(db *gorm.DB) *GatewaySvc {
 	}
 }
 
-func (gw *Gateway) BeforeCreate(tx *gorm.DB) (err error) {
-	gw.ID = uuid.New().String()
-	fmt.Println(gw.ID)
-	return
-}
-
 func (gs *GatewaySvc) FindAllGateway(ctx context.Context) (gwList []Gateway, err error) {
 	result := gs.db.Preload("Doorlocks").Find(&gwList)
 	if err := result.Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return gwList, nil
@@ -48,7 +40,7 @@ func (gs *GatewaySvc) FindAllGateway(ctx context.Context) (gwList []Gateway, err
 func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id string) (gw *Gateway, err error) {
 	result := gs.db.Preload("Doorlocks").First(&gw, id)
 	if err := result.Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return gw, nil
@@ -56,7 +48,7 @@ func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id string) (gw *Gatew
 
 func (gs *GatewaySvc) CreateGateway(ctx context.Context, g *Gateway) (*Gateway, error) {
 	if err := gs.db.Create(&g).Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return g, nil
@@ -68,8 +60,8 @@ func (gs *GatewaySvc) UpdateGateway(ctx context.Context, g *Gateway) (bool, erro
 
 }
 
-func (gs *GatewaySvc) DeleteGateway(ctx context.Context, g *Gateway) (bool, error) {
-	result := gs.db.Unscoped().Where("id = ?", g.ID).Delete(g)
+func (gs *GatewaySvc) DeleteGateway(ctx context.Context, gwId uint) (bool, error) {
+	result := gs.db.Unscoped().Where("id = ?", gwId).Delete(&Gateway{})
 	return utils.ReturnBoolStateFromResult(result)
 }
 

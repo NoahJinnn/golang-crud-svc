@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -25,15 +24,10 @@ func NewAreaSvc(db *gorm.DB) *AreaSvc {
 	}
 }
 
-func (a *Area) BeforeCreate(tx *gorm.DB) (err error) {
-	a.ID = uuid.New().String()
-	return
-}
-
 func (as *AreaSvc) FindAllArea(ctx context.Context) (aList []Area, err error) {
 	result := as.db.Preload("Doorlocks").Joins("Gateway").Find(&aList)
 	if err := result.Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return aList, nil
@@ -42,7 +36,7 @@ func (as *AreaSvc) FindAllArea(ctx context.Context) (aList []Area, err error) {
 func (as *AreaSvc) FindAreaByID(ctx context.Context, id string) (a *Area, err error) {
 	result := as.db.Preload("Doorlocks").First(&a, id)
 	if err := result.Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return a, nil
@@ -50,7 +44,7 @@ func (as *AreaSvc) FindAreaByID(ctx context.Context, id string) (a *Area, err er
 
 func (as *AreaSvc) CreateArea(a *Area, ctx context.Context) (*Area, error) {
 	if err := as.db.Create(&a).Error; err != nil {
-		err = utils.QueryErrorHandler(err)
+		err = utils.HandleQueryError(err)
 		return nil, err
 	}
 	return a, nil
@@ -61,7 +55,7 @@ func (as *AreaSvc) UpdateArea(ctx context.Context, a *Area) (bool, error) {
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (as *AreaSvc) DeleteArea(ctx context.Context, a *Area) (bool, error) {
-	result := as.db.Unscoped().Where("id = ?", a.ID).Delete(a)
+func (as *AreaSvc) DeleteArea(ctx context.Context, areaId uint) (bool, error) {
+	result := as.db.Unscoped().Where("id = ?", areaId).Delete(&Area{})
 	return utils.ReturnBoolStateFromResult(result)
 }

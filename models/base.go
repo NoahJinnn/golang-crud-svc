@@ -5,7 +5,11 @@ import (
 )
 
 type GormModel struct {
-	ID        string    `gorm:"primarykey; type:varchar(256)"`
+	ID        uint      `gorm:"primaryKey"`
 	CreatedAt time.Time `swaggerignore:"true"`
 	UpdatedAt time.Time `swaggerignore:"true"`
+}
+
+type DeleteID struct {
+	ID uint `json:"id"`
 }

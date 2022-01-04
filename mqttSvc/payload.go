@@ -6,30 +6,42 @@ import (
 	"github.com/ecoprohcm/DMS_BackendServer/models"
 )
 
-func ServerDeleteDoorlockPayload(doorlock *models.Doorlock) string {
-	return fmt.Sprintf(`{"door_id":%s}`, doorlock.ID)
+func ServerDeleteDoorlockPayload(doorlock *models.DoorlockDelete) string {
+	return PayloadWithGatewayId(doorlock.GatewayID, fmt.Sprintf(`{"door_id":%d}`, doorlock.ID))
 }
 
 func ServerUpdateDoorlockPayload(doorlock *models.Doorlock) string {
-	return fmt.Sprintf(`{"door_id":%s,"description":%s,"location":%s, "state":%s}`, doorlock.ID, doorlock.Description, doorlock.Location, doorlock.State)
+	return PayloadWithGatewayId(doorlock.GatewayID,
+		fmt.Sprintf(`{"door_id":%d,"description":%s,"location":%s, "state":%s}`,
+			doorlock.ID, doorlock.Description, doorlock.Location, doorlock.State))
 }
 
-func ServerCmdDoorlockPayload(doorlockId string, cmd string) string {
-	return fmt.Sprintf(`{"door_id":%s,"action":%s}`, doorlockId, cmd)
+func ServerCmdDoorlockPayload(gwId string, doorlockId uint, cmd string) string {
+	return PayloadWithGatewayId(gwId, fmt.Sprintf(`{"door_id":%d,"action":%s}`, doorlockId, cmd))
 }
 
 func ServerUpdateGatewayPayload(gw *models.Gateway) string {
-	return fmt.Sprintf(`{"gateway_id":%s,"area_id":%s,"name":%s, "state":%s}`, gw.ID, gw.AreaID, gw.Name, gw.State)
+	return fmt.Sprintf(`{"gateway_id":%d,"area_id":%d,"name":%s, "state":%s}`,
+		gw.ID, gw.AreaID, gw.Name, gw.State)
 }
 
-func ServerCreatePasswordPayload(pw *models.Password) string {
-	return fmt.Sprintf(`{"user_id":%s,"password_id":%s,"password_type":%s,"password_hash":%s}`, pw.UserID, pw.ID, pw.PasswordType, pw.PasswordHash)
+func ServerCreatePasswordPayload(pw *models.PasswordCreate) string {
+	return PayloadWithGatewayId(pw.GatewayID,
+		fmt.Sprintf(`{"user_id":%d,"password_id":%d,"password_type":%s,"password_hash":%s}`,
+			pw.UserID, pw.ID, pw.PasswordType, pw.PasswordHash))
 }
 
-func ServerUpdatePasswordPayload(pw *models.Password) string {
-	return fmt.Sprintf(`{"password_id":%s,"password_type":%s,"password_hash":%s}`, pw.ID, pw.PasswordType, pw.PasswordHash)
+func ServerUpdatePasswordPayload(pw *models.PasswordCreate) string {
+	return PayloadWithGatewayId(pw.GatewayID,
+		fmt.Sprintf(`"password_id":%d,"password_type":%s,"password_hash":%s}`,
+			pw.ID, pw.PasswordType, pw.PasswordHash))
 }
 
-func ServerDeletePasswordPayload(pw *models.Password) string {
-	return fmt.Sprintf(`{"password_id":%s}`, pw.ID)
+func ServerDeletePasswordPayload(pw *models.PasswordCreate) string {
+	return PayloadWithGatewayId(pw.GatewayID,
+		fmt.Sprintf(`"password_id":%d}`, pw.ID))
+}
+
+func PayloadWithGatewayId(gwId string, content string) string {
+	return fmt.Sprintf(`{"gateway_id":%s,message:%s}`, gwId, content)
 }
