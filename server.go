@@ -11,6 +11,8 @@ func setupRouter(
 	dlHandler *handlers.DoorlockHandler,
 	glHandler *handlers.GatewayLogHandler,
 	pwHdlr *handlers.PasswordHandler,
+	sHdlr *handlers.StudentHandler,
+	eHdlr *handlers.EmployeeHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -46,6 +48,20 @@ func setupRouter(
 		v1R.POST("/password", pwHdlr.CreatePassword)
 		v1R.PATCH("/password", pwHdlr.UpdatePassword)
 		v1R.DELETE("/password", pwHdlr.DeletePassword)
+
+		// Student routes
+		v1R.GET("/students", sHdlr.FindAllStudent)
+		v1R.GET("/student/:id", sHdlr.FindStudentByID)
+		v1R.POST("/student", sHdlr.CreateStudent)
+		v1R.PATCH("/student", sHdlr.UpdateStudent)
+		v1R.DELETE("/student", sHdlr.DeleteStudent)
+
+		// Employee routes
+		v1R.GET("/employees", eHdlr.FindAllEmployee)
+		v1R.GET("/employee/:id", eHdlr.FindEmployeeByID)
+		v1R.POST("/employee", eHdlr.CreateEmployee)
+		v1R.PATCH("/employee", eHdlr.UpdateEmployee)
+		v1R.DELETE("/employee", eHdlr.DeleteEmployee)
 
 		// Gateway log routes
 		v1R.GET("/gatewayLogs", glHandler.FindAllGatewayLog)

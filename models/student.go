@@ -9,9 +9,11 @@ import (
 
 type Student struct {
 	GormModel
-	MSSV  string `gorm:"type:varchar(50)" json:"mssv"`
+	MSSV  string `gorm:"type:varchar(50); unique; not null;" json:"mssv"`
 	Name  string `gorm:"type:varchar(256)" json:"name"`
 	Phone string `gorm:"type:varchar(50)" json:"phone"`
+	Email string `gorm:"type:varchar(256); unique; not null;" json:"email"`
+	Major string `gorm:"type:varchar(256); not null;" json:"major"`
 }
 
 type StudentSvc struct {
@@ -56,6 +58,10 @@ func (ss *StudentSvc) UpdateStudent(ctx context.Context, s *Student) (bool, erro
 }
 
 func (ss *StudentSvc) DeleteStudent(ctx context.Context, studentId uint) (bool, error) {
-	result := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Student{})
+	err := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Student{}).Error
+	if err != nil {
+		return false, err
+	}
+	result := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Password{})
 	return utils.ReturnBoolStateFromResult(result)
 }

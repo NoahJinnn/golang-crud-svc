@@ -56,6 +56,8 @@ func main() {
 	dlSvc := models.NewDoorlockSvc(db)
 	glSvc := models.NewLogSvc(db)
 	pwSvc := models.NewPasswordSvc(db)
+	sSvc := models.NewStudentSvc(db)
+	eSvc := models.NewEmployeeSvc(db)
 
 	mqttHost := os.Getenv("SERVER_HOST")
 	mqttPort := os.Getenv("MQTT_PORT")
@@ -67,9 +69,11 @@ func main() {
 	dlHdlr := handlers.NewDoorlockHandler(dlSvc, mqttClient)
 	glHdlr := handlers.NewGatewayLogHandler(glSvc)
 	pwHdlr := handlers.NewPasswordHandler(pwSvc, mqttClient)
+	sHdlr := handlers.NewStudentHandler(sSvc, mqttClient)
+	eHdlr := handlers.NewEmployeeHandler(eSvc, mqttClient)
 
 	// HTTP Serve
-	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr, pwHdlr)
+	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr, pwHdlr, sHdlr, eHdlr)
 	initSwagger(r)
 	r.Run(":8080")
 	mqttClient.Disconnect(250)

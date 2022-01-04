@@ -25,7 +25,7 @@ func NewPasswordHandler(svc *models.PasswordSvc, mqtt mqtt.Client) *PasswordHand
 // Find all passwords info
 // @Summary Find All Password
 // @Schemes
-// @Description find all passwords info
+// @Description find all passwords info by user id
 // @Produce json
 // @Success 200 {array} []models.Password
 // @Failure 400 {object} utils.ErrorResponse
@@ -99,7 +99,7 @@ func (h *PasswordHandler) CreatePassword(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/password [patch]
 func (h *PasswordHandler) UpdatePassword(c *gin.Context) {
-	pw := &models.PasswordCreate{}
+	pw := &models.Password{}
 	err := c.ShouldBind(pw)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -120,7 +120,7 @@ func (h *PasswordHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.UpdatePassword(c.Request.Context(), &pw.Password)
+	isSuccess, err := h.svc.UpdatePassword(c.Request.Context(), pw)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -138,13 +138,13 @@ func (h *PasswordHandler) UpdatePassword(c *gin.Context) {
 // @Description Delete password using "id" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	object{id=int}	true	"Password ID"
+// @Param	data	body	models.PasswordDelete	true	"Password ID"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/password [delete]
 func (h *PasswordHandler) DeletePassword(c *gin.Context) {
-	pw := &models.PasswordCreate{}
-	err := c.ShouldBind(pw)
+	dId := &models.DeleteID{}
+	err := c.ShouldBind(dId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -154,7 +154,7 @@ func (h *PasswordHandler) DeletePassword(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_PASSWORD_D, 1, false, mqttSvc.ServerDeletePasswordPayload(pw))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_PASSWORD_D, 1, false, mqttSvc.ServerDeletePasswordPayload(dId.ID))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -164,7 +164,7 @@ func (h *PasswordHandler) DeletePassword(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeletePassword(c.Request.Context(), &pw.Password)
+	isSuccess, err := h.svc.DeletePassword(c.Request.Context(), dId.ID)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

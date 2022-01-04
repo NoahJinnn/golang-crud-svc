@@ -9,7 +9,7 @@ import (
 
 type Password struct {
 	GormModel
-	UserID       uint   `json:"userId"`
+	UserID       uint   `gorm:"not null;" json:"userId"`
 	PasswordType string `gorm:"type:varchar(10)" json:"passwordType"`
 	PasswordHash string `gorm:"type:varchar(256)" json:"passwordHash"`
 }
@@ -18,7 +18,6 @@ type PasswordCreate struct {
 	Password
 	GatewayID string `json:"gatewayId"`
 }
-
 type PasswordSvc struct {
 	db *gorm.DB
 }
@@ -46,12 +45,12 @@ func (ps *PasswordSvc) CreatePassword(ctx context.Context, p *Password) (*Passwo
 	return p, nil
 }
 
-func (ps *PasswordSvc) UpdatePassword(ctx context.Context, a *Password) (bool, error) {
-	result := ps.db.Model(&a).Where("id = ?", a.ID).Updates(a)
+func (ps *PasswordSvc) UpdatePassword(ctx context.Context, p *Password) (bool, error) {
+	result := ps.db.Model(&p).Where("id = ?", p.ID).Updates(p)
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (ps *PasswordSvc) DeletePassword(ctx context.Context, a *Password) (bool, error) {
-	result := ps.db.Unscoped().Where("id = ?", a.ID).Delete(a)
+func (ps *PasswordSvc) DeletePassword(ctx context.Context, pwId uint) (bool, error) {
+	result := ps.db.Unscoped().Where("id = ?", pwId).Delete(&Password{})
 	return utils.ReturnBoolStateFromResult(result)
 }

@@ -17,4 +17,6 @@ func migrate(db *gorm.DB) {
 	migrateTable(db, &models.Doorlock{})
 	migrateTable(db, &models.GatewayLog{})
 	migrateTable(db, &models.Password{})
+	migrateTable(db, &models.Student{})
+	migrateTable(db, &models.Employee{})
 }
