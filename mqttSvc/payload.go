@@ -7,17 +7,17 @@ import (
 )
 
 func ServerDeleteDoorlockPayload(doorlock *models.DoorlockDelete) string {
-	return PayloadWithGatewayId(doorlock.GatewayID, fmt.Sprintf(`{"door_id":%d}`, doorlock.ID))
+	return PayloadWithGatewayId(doorlock.GatewayID, fmt.Sprintf(`{"door_id":%s}`, doorlock.DoorSerialID))
 }
 
 func ServerUpdateDoorlockPayload(doorlock *models.Doorlock) string {
 	return PayloadWithGatewayId(doorlock.GatewayID,
-		fmt.Sprintf(`{"door_id":%d,"description":%s,"location":%s, "state":%s}`,
-			doorlock.ID, doorlock.Description, doorlock.Location, doorlock.State))
+		fmt.Sprintf(`{"door_id":%s,"description":%s,"location":%s, "state":%s}`,
+			doorlock.DoorSerialID, doorlock.Description, doorlock.Location, doorlock.State))
 }
 
-func ServerCmdDoorlockPayload(gwId string, doorlockId uint, cmd string) string {
-	return PayloadWithGatewayId(gwId, fmt.Sprintf(`{"door_id":%d,"action":%s}`, doorlockId, cmd))
+func ServerCmdDoorlockPayload(gwId string, doorSerialId string, cmd string) string {
+	return PayloadWithGatewayId(gwId, fmt.Sprintf(`{"door_id":%s,"action":%s}`, doorSerialId, cmd))
 }
 
 func ServerUpdateGatewayPayload(gw *models.Gateway) string {
@@ -40,6 +40,20 @@ func ServerUpdatePasswordPayload(pw *models.Password) string {
 func ServerDeletePasswordPayload(pwId uint) string {
 	return PayloadWithGatewayId("0",
 		fmt.Sprintf(`"password_id":%d}`, pwId))
+}
+
+func ServerUpsertRegisterPayload(ssu models.StudentSchedulerUpsert, userId string) string {
+	sche := ssu.Scheduler
+	registerTime := fmt.Sprintf(`{"start_date":%s,"stop_date":%s,"week_day":%d,"start_class":%d,"end_class":%d}`,
+		sche.StartDate, sche.EndDate, sche.WeekDay, sche.StartClassTime, sche.EndClassTime)
+	return fmt.Sprintf(`{"register_id":%d,"gateway_id":%s,"doorlock_id":%s, "user_id":%s, "register_time":%s}`,
+		sche.ID, ssu.GatewayID, ssu.DoorlockID, userId, registerTime)
+}
+
+func ServerDeleteRegisterPayload(ssu models.StudentSchedulerUpsert, userId string) string {
+	sche := ssu.Scheduler
+	return fmt.Sprintf(`{"register_id":%d,"gateway_id":%s,"doorlock_id":%s, "user_id":%s}`,
+		sche.ID, ssu.GatewayID, ssu.DoorlockID, userId)
 }
 
 func PayloadWithGatewayId(gwId string, content string) string {

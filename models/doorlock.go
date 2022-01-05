@@ -10,23 +10,25 @@ import (
 
 type Doorlock struct {
 	GormModel
-	AreaID          uint      `json:"areaId"`
-	GatewayID       string    `gorm:"type:varchar(100)" json:"gatewayId"`
-	Description     string    `json:"description"`
-	Location        string    `gorm:"unique;not null" json:"location"`
-	LastConnectTime time.Time `json:"lastConnectTime"`
-	State           string    `gorm:"not null" json:"state"`
+	DoorSerialID    string      `gorm:"unique;not null" json:"doorSerialId"`
+	Location        string      `gorm:"unique;not null" json:"location"`
+	State           string      `gorm:"not null" json:"state"`
+	Description     string      `json:"description"`
+	LastConnectTime time.Time   `json:"lastConnectTime"`
+	AreaID          uint        `json:"areaId"`
+	GatewayID       string      `gorm:"type:varchar(256);" json:"gatewayId"`
+	Schedulers      []Scheduler `gorm:"many2many:door_schedulers;"`
 }
 
 type DoorlockCmd struct {
-	ID        uint   `json:"id"`
-	GatewayID string `json:"gatewayId"`
-	Command   string `json:"command"`
+	DoorSerialID string `json:"doorSerialId"`
+	GatewayID    string `json:"gatewayId"`
+	Command      string `json:"command"`
 }
 
 type DoorlockDelete struct {
-	ID        uint   `json:"id"`
-	GatewayID string `json:"gatewayId"`
+	DoorSerialID string `json:"doorSerialId"`
+	GatewayID    string `json:"gatewayId"`
 }
 
 type DoorlockSvc struct {
@@ -39,8 +41,15 @@ func NewDoorlockSvc(db *gorm.DB) *DoorlockSvc {
 	}
 }
 
+func (d *Doorlock) BeforeCreate(tx *gorm.DB) (err error) {
+	if d.State == "" {
+		d.State = "Close"
+	}
+	return
+}
+
 func (dls *DoorlockSvc) FindAllDoorlock(ctx context.Context) (dlList []Doorlock, err error) {
-	result := dls.db.Find(&dlList)
+	result := dls.db.Preload("Schedulers").Find(&dlList)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -49,7 +58,7 @@ func (dls *DoorlockSvc) FindAllDoorlock(ctx context.Context) (dlList []Doorlock,
 }
 
 func (dls *DoorlockSvc) FindDoorlockByID(ctx context.Context, id string) (dl *Doorlock, err error) {
-	result := dls.db.First(&dl, id)
+	result := dls.db.Preload("Schedulers").First(&dl, id)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -75,7 +84,7 @@ func (dls *DoorlockSvc) UpdateDoorlockGateway(ctx context.Context, dl *Doorlock,
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (dls *DoorlockSvc) DeleteDoorlock(ctx context.Context, doorlockId uint) (bool, error) {
-	result := dls.db.Unscoped().Where("id = ?", doorlockId).Delete(&Doorlock{})
+func (dls *DoorlockSvc) DeleteDoorlock(ctx context.Context, doorSerialId string) (bool, error) {
+	result := dls.db.Unscoped().Where("door_serial_id = ?", doorSerialId).Delete(&Doorlock{})
 	return utils.ReturnBoolStateFromResult(result)
 }

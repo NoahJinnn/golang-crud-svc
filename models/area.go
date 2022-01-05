@@ -9,10 +9,9 @@ import (
 
 type Area struct {
 	GormModel
-	Gateway   Gateway    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"gateway"`
-	Name      string     `gorm:"unique;not null" json:"name"`
-	Manager   string     `gorm:"unique;not null" json:"manager"`
-	Doorlocks []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
+	Name    string  `gorm:"unique;not null" json:"name"`
+	Manager string  `gorm:"not null" json:"manager"`
+	Gateway Gateway `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"gateway"`
 }
 type AreaSvc struct {
 	db *gorm.DB
@@ -25,7 +24,7 @@ func NewAreaSvc(db *gorm.DB) *AreaSvc {
 }
 
 func (as *AreaSvc) FindAllArea(ctx context.Context) (aList []Area, err error) {
-	result := as.db.Preload("Doorlocks").Joins("Gateway").Find(&aList)
+	result := as.db.Joins("Gateway").Find(&aList)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -34,7 +33,7 @@ func (as *AreaSvc) FindAllArea(ctx context.Context) (aList []Area, err error) {
 }
 
 func (as *AreaSvc) FindAreaByID(ctx context.Context, id string) (a *Area, err error) {
-	result := as.db.Preload("Doorlocks").First(&a, id)
+	result := as.db.First(&a, id)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err

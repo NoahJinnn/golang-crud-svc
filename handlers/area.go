@@ -18,7 +18,7 @@ func NewAreaHandler(svc *models.AreaSvc) *AreaHandler {
 	}
 }
 
-// Find all areas and doorlocks info
+// Find all areas info
 // @Summary Find All Area
 // @Schemes
 // @Description find all areas info
@@ -39,10 +39,10 @@ func (h *AreaHandler) FindAllArea(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, aList)
 }
 
-// Find area and doorlock info by id
+// Find area info by id
 // @Summary Find Area By ID
 // @Schemes
-// @Description find area and doorlock info by area id
+// @Description find area info by area id
 // @Produce json
 // @Param        id	path	string	true	"Area ID"
 // @Success 200 {object} models.Area

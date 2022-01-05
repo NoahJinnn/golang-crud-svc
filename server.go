@@ -13,6 +13,7 @@ func setupRouter(
 	pwHdlr *handlers.PasswordHandler,
 	sHdlr *handlers.StudentHandler,
 	eHdlr *handlers.EmployeeHandler,
+	scheHdlr *handlers.SchedulerHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -55,6 +56,9 @@ func setupRouter(
 		v1R.POST("/student", sHdlr.CreateStudent)
 		v1R.PATCH("/student", sHdlr.UpdateStudent)
 		v1R.DELETE("/student", sHdlr.DeleteStudent)
+		v1R.POST("/student/:id/scheduler", sHdlr.AppendStudentScheduler)
+		v1R.PATCH("/student/:id/scheduler", sHdlr.UpdateStudentScheduler)
+		v1R.DELETE("/student/:id/scheduler", sHdlr.DeleteStudentScheduler)
 
 		// Employee routes
 		v1R.GET("/employees", eHdlr.FindAllEmployee)
@@ -62,6 +66,13 @@ func setupRouter(
 		v1R.POST("/employee", eHdlr.CreateEmployee)
 		v1R.PATCH("/employee", eHdlr.UpdateEmployee)
 		v1R.DELETE("/employee", eHdlr.DeleteEmployee)
+
+		// Scheduler routes
+		v1R.GET("/schedulers", scheHdlr.FindAllScheduler)
+		v1R.GET("/scheduler/:id", scheHdlr.FindSchedulerByID)
+		v1R.POST("/scheduler", scheHdlr.CreateScheduler)
+		v1R.PATCH("/scheduler", scheHdlr.UpdateScheduler)
+		v1R.DELETE("/scheduler", scheHdlr.DeleteScheduler)
 
 		// Gateway log routes
 		v1R.GET("/gatewayLogs", glHandler.FindAllGatewayLog)

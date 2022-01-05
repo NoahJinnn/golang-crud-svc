@@ -4,7 +4,7 @@ import "time"
 
 type SwagCreateGateway struct {
 	AreaID          uint      `json:"areaId"`
-	MacID           string    `json:"macId"`
+	GatewayID       string    `json:"gatewayId"`
 	Name            string    `json:"name"`
 	LastConnectTime time.Time `json:"lastConnectTime"`
 	State           string    `json:"state"`

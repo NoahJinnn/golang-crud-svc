@@ -9,8 +9,8 @@ import (
 )
 
 type GatewayLog struct {
-	ID        uint      `gorm:"primarykey;`
-	MacID     string    `gorm:"unique; not null" json:"macId"`
+	ID        uint      `gorm:"primarykey;"`
+	GatewayID string    `gorm:"unique; not null" json:"gatewayId"`
 	LogType   string    `json:"logType"`
 	Content   string    `json:"content"`
 	LogTime   string    `json:"logTime"`

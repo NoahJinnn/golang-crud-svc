@@ -5,6 +5,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
+	"github.com/ecoprohcm/DMS_BackendServer/mqttSvc"
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -167,4 +168,112 @@ func (h *StudentHandler) DeleteStudent(c *gin.Context) {
 	}
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 
+}
+
+func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
+	ssu := &models.StudentSchedulerUpsert{}
+	sId := c.Param("id")
+	err := c.ShouldBind(ssu)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Invalid req body",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*ssu, sId))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Create scheduler mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	_, err = h.svc.AppendStudentScheduler(c.Request.Context(), sId, ssu.DoorlockID, &ssu.Scheduler)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update student failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	utils.ResponseJson(c, http.StatusOK, true)
+}
+
+func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
+	ssu := &models.StudentSchedulerUpsert{}
+	sId := c.Param("id")
+	err := c.ShouldBind(ssu)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Invalid req body",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*ssu, sId))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update scheduler mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	_, err = h.svc.UpdateStudentScheduler(c.Request.Context(), sId, ssu.DoorlockID, &ssu.Scheduler)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update student failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	utils.ResponseJson(c, http.StatusOK, true)
+}
+
+func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
+	ssu := &models.StudentSchedulerUpsert{}
+	sId := c.Param("id")
+	err := c.ShouldBind(ssu)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Invalid req body",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*ssu, sId))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Delete scheduler mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	_, err = h.svc.DeleteStudentScheduler(c.Request.Context(), sId, ssu.DoorlockID, &ssu.Scheduler)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update student failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	utils.ResponseJson(c, http.StatusOK, true)
 }

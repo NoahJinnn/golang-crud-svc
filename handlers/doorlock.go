@@ -80,9 +80,7 @@ func (h *DoorlockHandler) FindDoorlockByID(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/doorlock [post]
 func (h *DoorlockHandler) CreateDoorlock(c *gin.Context) {
-	dl := &models.Doorlock{
-		State: "close",
-	}
+	dl := &models.Doorlock{}
 	err := c.ShouldBind(dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -179,7 +177,7 @@ func (h *DoorlockHandler) UpdateDoorlockCmd(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(string(mqttSvc.TOPIC_SV_DOORLOCK_CMD), 1, false, mqttSvc.ServerCmdDoorlockPayload(dl.GatewayID, dl.ID, dl.Command))
+	t := h.mqtt.Publish(string(mqttSvc.TOPIC_SV_DOORLOCK_CMD), 1, false, mqttSvc.ServerCmdDoorlockPayload(dl.GatewayID, dl.DoorSerialID, dl.Command))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -243,7 +241,7 @@ func (h *DoorlockHandler) DeleteDoorlock(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteDoorlock(c.Request.Context(), dl.ID)
+	isSuccess, err := h.svc.DeleteDoorlock(c.Request.Context(), dl.DoorSerialID)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

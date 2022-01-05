@@ -9,12 +9,13 @@ import (
 
 type Employee struct {
 	GormModel
-	MSNV       string `gorm:"type:varchar(50); unique; not null;" json:"msnv"`
-	Name       string `gorm:"type:varchar(256)" json:"name"`
-	Phone      string `gorm:"type:varchar(50)" json:"phone"`
-	Email      string `gorm:"type:varchar(256); not null;" json:"email"`
-	Department string `gorm:"type:varchar(50)" json:"department"`
-	Role       string `gorm:"type:varchar(256); not null;" json:"role"`
+	MSNV       string      `gorm:"unique; not null;" json:"msnv"`
+	Name       string      `json:"name"`
+	Phone      string      `gorm:"type:varchar(50)" json:"phone"`
+	Email      string      `gorm:"type:varchar(256); not null;" json:"email"`
+	Department string      `json:"department"`
+	Role       string      `gorm:"not null;" json:"role"`
+	Schedulers []Scheduler `gorm:"many2many:employee_schedulers;"`
 }
 
 type EmployeeSvc struct {
@@ -28,7 +29,7 @@ func NewEmployeeSvc(db *gorm.DB) *EmployeeSvc {
 }
 
 func (es *EmployeeSvc) FindAllEmployee(ctx context.Context) (eList []Employee, err error) {
-	result := es.db.Find(&eList)
+	result := es.db.Preload("Schedulers").Find(&eList)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -37,7 +38,7 @@ func (es *EmployeeSvc) FindAllEmployee(ctx context.Context) (eList []Employee, e
 }
 
 func (es *EmployeeSvc) FindEmployeeByID(ctx context.Context, id string) (e *Employee, err error) {
-	result := es.db.First(&e, id)
+	result := es.db.Preload("Schedulers").First(&e, id)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err

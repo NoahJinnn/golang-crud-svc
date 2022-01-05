@@ -11,11 +11,11 @@ import (
 type Gateway struct {
 	GormModel
 	AreaID          uint       `json:"areaId"`
-	MacID           string     `gorm:"unique;not null" json:"macId"`
+	GatewayID       string     `gorm:"type:varchar(256);unique;not null;" json:"gatewayId"`
 	Name            string     `gorm:"unique;not null" json:"name"`
 	LastConnectTime time.Time  `json:"lastConnectTime"`
 	State           string     `gorm:"not null" json:"state"`
-	Doorlocks       []Doorlock `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
+	Doorlocks       []Doorlock `gorm:"foreignKey:GatewayID;references:GatewayID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
 }
 
 type GatewaySvc struct {
@@ -66,6 +66,6 @@ func (gs *GatewaySvc) DeleteGateway(ctx context.Context, gwId uint) (bool, error
 }
 
 func (gs *GatewaySvc) DeleteGatewayByMacId(ctx context.Context, g *Gateway) (bool, error) {
-	result := gs.db.Unscoped().Where("mac_id = ?", g.MacID).Delete(g)
+	result := gs.db.Unscoped().Where("gateway_id = ?", g.GatewayID).Delete(g)
 	return utils.ReturnBoolStateFromResult(result)
 }

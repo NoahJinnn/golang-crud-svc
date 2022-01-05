@@ -55,11 +55,11 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 	t := client.Subscribe(string(TOPIC_GW_SHUTDOWN), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
-		macId := gjson.Get(payloadStr, "mac_id")
+		gwId := gjson.Get(payloadStr, "gateway_id")
 		gwMsg := gjson.Get(payloadStr, "message")
-		fmt.Printf("[MQTT-INFO] Gateway %s is shutdown with message: %s", macId, gwMsg)
+		fmt.Printf("[MQTT-INFO] Gateway %s is shutdown with message: %s", gwId, gwMsg)
 		gw := &models.Gateway{
-			MacID: macId.String(),
+			GatewayID: gwId.String(),
 		}
 		gwSvc.DeleteGatewayByMacId(context.Background(), gw)
 	})
@@ -70,7 +70,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 	t = client.Subscribe(string(TOPIC_GW_BOOTUP), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
-		macId := gjson.Get(payloadStr, "mac_id")
+		gwId := gjson.Get(payloadStr, "gateway_id")
 		users := gjson.Get(payloadStr, "message.users")
 		if users.Exists() {
 			for _, v := range users.Array() {
@@ -88,12 +88,12 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 					dl = &models.Doorlock{
 						State:     "Close",
 						Location:  location.String(),
-						GatewayID: macId.String(),
+						GatewayID: gwId.String(),
 					}
 					dl.ID = uint(doorID.Uint())
 					doorlockSvc.CreateDoorlock(context.Background(), dl)
 				} else {
-					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, macId.Str)
+					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, gwId.Str)
 				}
 			}
 		}
@@ -106,16 +106,16 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 	t = client.Subscribe(string(TOPIC_GW_LOG_C), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
-		macId := gjson.Get(payloadStr, "macId")
-		logType := gjson.Get(payloadStr, "logType")
+		gatewayId := gjson.Get(payloadStr, "gateway_id")
+		logType := gjson.Get(payloadStr, "log_type")
 		content := gjson.Get(payloadStr, "content")
-		logTime := gjson.Get(payloadStr, "logTime")
+		logTime := gjson.Get(payloadStr, "log_time")
 		fmt.Printf(" %s: %s \n", msg.Topic(), payloadStr)
 		logSvc.CreateGatewayLog(context.Background(), &models.GatewayLog{
-			MacID:   macId.String(),
-			LogType: logType.String(),
-			Content: content.String(),
-			LogTime: logTime.String(),
+			GatewayID: gatewayId.String(),
+			LogType:   logType.String(),
+			Content:   content.String(),
+			LogTime:   logTime.String(),
 		})
 	})
 
@@ -158,7 +158,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_D), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
 		doorId := gjson.Get(payloadStr, "door_id")
-		doorlockSvc.DeleteDoorlock(context.Background(), uint(doorId.Uint()))
+		doorlockSvc.DeleteDoorlock(context.Background(), doorId.String())
 	})
 
 	if err := HandleMqttErr(&t); err == nil {
