@@ -10,7 +10,7 @@ func setupRouter(
 	areaHandler *handlers.AreaHandler,
 	dlHandler *handlers.DoorlockHandler,
 	glHandler *handlers.GatewayLogHandler,
-	pwHdlr *handlers.PasswordHandler,
+	// pwHdlr *handlers.PasswordHandler,
 	sHdlr *handlers.StudentHandler,
 	eHdlr *handlers.EmployeeHandler,
 	scheHdlr *handlers.SchedulerHandler,
@@ -45,10 +45,10 @@ func setupRouter(
 		v1R.DELETE("/doorlock", dlHandler.DeleteDoorlock)
 
 		// Password routes
-		v1R.GET("/passwords/:userId", pwHdlr.FindAllPasswordByUserID)
-		v1R.POST("/password", pwHdlr.CreatePassword)
-		v1R.PATCH("/password", pwHdlr.UpdatePassword)
-		v1R.DELETE("/password", pwHdlr.DeletePassword)
+		// v1R.GET("/passwords/:userId", pwHdlr.FindAllPasswordByUserID)
+		// v1R.POST("/password", pwHdlr.CreatePassword)
+		// v1R.PATCH("/password", pwHdlr.UpdatePassword)
+		// v1R.DELETE("/password", pwHdlr.DeletePassword)
 
 		// Student routes
 		v1R.GET("/students", sHdlr.FindAllStudent)

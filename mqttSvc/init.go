@@ -82,16 +82,23 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 		if doorlocks.Exists() {
 			for _, v := range doorlocks.Array() {
 				doorID := v.Get("door_id")
-				dl, _ := doorlockSvc.FindDoorlockByID(context.Background(), doorID.String())
-				if dl == nil {
-					location := v.Get("location")
-					dl = &models.Doorlock{
-						State:     "Close",
-						Location:  location.String(),
-						GatewayID: gwId.String(),
-					}
-					dl.ID = uint(doorID.Uint())
+				location := v.Get("location")
+				state := v.Get("state")
+				description := v.Get("description")
+				lastConnectTime := v.Get("last_connect_time")
+
+				dl := &models.Doorlock{
+					State:           state.String(),
+					Location:        location.String(),
+					GatewayID:       gwId.String(),
+					Description:     description.String(),
+					LastConnectTime: lastConnectTime.Time(),
+				}
+
+				checkDl, _ := doorlockSvc.FindDoorlockBySerialID(context.Background(), doorID.String())
+				if checkDl == nil {
 					doorlockSvc.CreateDoorlock(context.Background(), dl)
+					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, gwId.Str)
 				} else {
 					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, gwId.Str)
 				}

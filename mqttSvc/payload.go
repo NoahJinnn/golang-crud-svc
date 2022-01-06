@@ -25,18 +25,6 @@ func ServerUpdateGatewayPayload(gw *models.Gateway) string {
 		gw.ID, gw.AreaID, gw.Name, gw.State)
 }
 
-func ServerCreatePasswordPayload(pw *models.PasswordCreate) string {
-	return PayloadWithGatewayId(pw.GatewayID,
-		fmt.Sprintf(`{"user_id":%d,"password_id":%d,"password_type":%s,"password_hash":%s}`,
-			pw.UserID, pw.ID, pw.PasswordType, pw.PasswordHash))
-}
-
-func ServerUpdatePasswordPayload(pw *models.Password) string {
-	return PayloadWithGatewayId("0",
-		fmt.Sprintf(`"password_id":%d,"password_type":%s,"password_hash":%s}`,
-			pw.ID, pw.PasswordType, pw.PasswordHash))
-}
-
 func ServerDeletePasswordPayload(pwId uint) string {
 	return PayloadWithGatewayId("0",
 		fmt.Sprintf(`"password_id":%d}`, pwId))

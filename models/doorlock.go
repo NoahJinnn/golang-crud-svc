@@ -15,7 +15,6 @@ type Doorlock struct {
 	State           string      `gorm:"not null" json:"state"`
 	Description     string      `json:"description"`
 	LastConnectTime time.Time   `json:"lastConnectTime"`
-	AreaID          uint        `json:"areaId"`
 	GatewayID       string      `gorm:"type:varchar(256);" json:"gatewayId"`
 	Schedulers      []Scheduler `gorm:"many2many:door_schedulers;"`
 }
@@ -59,6 +58,15 @@ func (dls *DoorlockSvc) FindAllDoorlock(ctx context.Context) (dlList []Doorlock,
 
 func (dls *DoorlockSvc) FindDoorlockByID(ctx context.Context, id string) (dl *Doorlock, err error) {
 	result := dls.db.Preload("Schedulers").First(&dl, id)
+	if err := result.Error; err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return dl, nil
+}
+
+func (dls *DoorlockSvc) FindDoorlockBySerialID(ctx context.Context, serialiId string) (dl *Doorlock, err error) {
+	result := dls.db.Preload("Schedulers").Where("door_serial_id = ?", serialiId).Find(&dl)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err

@@ -69,10 +69,6 @@ func (ss *SchedulerSvc) UpdateScheduler(ctx context.Context, s *Scheduler) (bool
 }
 
 func (ss *SchedulerSvc) DeleteScheduler(ctx context.Context, studentId uint) (bool, error) {
-	err := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Scheduler{}).Error
-	if err != nil {
-		return false, err
-	}
-	result := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Password{})
+	result := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Scheduler{})
 	return utils.ReturnBoolStateFromResult(result)
 }

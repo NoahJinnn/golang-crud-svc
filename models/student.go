@@ -14,6 +14,8 @@ type Student struct {
 	Phone      string      `gorm:"type:varchar(50)" json:"phone"`
 	Email      string      `gorm:"type:varchar(256); unique; not null;" json:"email"`
 	Major      string      `gorm:"not null;" json:"major"`
+	RfidPass   string      `gorm:"type:varchar(256)" json:"rfidPass"`
+	KeypadPass string      `gorm:"type:varchar(256)" json:"keypadPass"`
 	Schedulers []Scheduler `gorm:"many2many:student_schedulers;"`
 }
 
@@ -66,15 +68,7 @@ func (ss *StudentSvc) UpdateStudent(ctx context.Context, s *Student) (bool, erro
 
 func (ss *StudentSvc) DeleteStudent(ctx context.Context, studentId uint) (bool, error) {
 	result := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Student{})
-	isSuccess, err := utils.ReturnBoolStateFromResult(result)
-	if !isSuccess {
-		return isSuccess, err
-	}
-	err = ss.db.Unscoped().Where("id = ?", studentId).Delete(&Password{}).Error
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	return utils.ReturnBoolStateFromResult(result)
 }
 
 func (ss *StudentSvc) AppendStudentScheduler(ctx context.Context, sId string, doorSerialId string, sche *Scheduler) (*Student, error) {
