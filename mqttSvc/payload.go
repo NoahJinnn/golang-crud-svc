@@ -30,18 +30,18 @@ func ServerDeletePasswordPayload(pwId uint) string {
 		fmt.Sprintf(`"password_id":%d}`, pwId))
 }
 
-func ServerUpsertRegisterPayload(ssu models.StudentSchedulerUpsert, userId string) string {
-	sche := ssu.Scheduler
+func ServerUpsertRegisterPayload(usu models.UserSchedulerUpsert, rfidPass string, keypadPass string, userId string) string {
+	sche := usu.Scheduler
 	registerTime := fmt.Sprintf(`{"start_date":%s,"stop_date":%s,"week_day":%d,"start_class":%d,"end_class":%d}`,
 		sche.StartDate, sche.EndDate, sche.WeekDay, sche.StartClassTime, sche.EndClassTime)
-	return fmt.Sprintf(`{"register_id":%d,"gateway_id":%s,"doorlock_id":%s, "user_id":%s, "register_time":%s}`,
-		sche.ID, ssu.GatewayID, ssu.DoorlockID, userId, registerTime)
+	return fmt.Sprintf(`{"register_id":%d,"gateway_id":%s,"doorlock_id":%s, "user_id":%s, "rfid_pw":%s,"keypad_pw":%s,"register_time":%s}`,
+		sche.ID, usu.GatewayID, usu.DoorlockID, userId, rfidPass, keypadPass, registerTime)
 }
 
-func ServerDeleteRegisterPayload(ssu models.StudentSchedulerUpsert, userId string) string {
-	sche := ssu.Scheduler
+func ServerDeleteRegisterPayload(usu models.UserSchedulerUpsert, userId string) string {
+	sche := usu.Scheduler
 	return fmt.Sprintf(`{"register_id":%d,"gateway_id":%s,"doorlock_id":%s, "user_id":%s}`,
-		sche.ID, ssu.GatewayID, ssu.DoorlockID, userId)
+		sche.ID, usu.GatewayID, usu.DoorlockID, userId)
 }
 
 func PayloadWithGatewayId(gwId string, content string) string {

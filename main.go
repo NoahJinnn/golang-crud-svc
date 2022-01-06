@@ -59,11 +59,12 @@ func main() {
 	sSvc := models.NewStudentSvc(db)
 	eSvc := models.NewEmployeeSvc(db)
 	scheSvc := models.NewSchedulerSvc(db)
+	cusSvc := models.NewCustomerSvc(db)
 
 	mqttHost := os.Getenv("SERVER_HOST")
 	mqttPort := os.Getenv("MQTT_PORT")
 
-	mqttClient := mqttSvc.MqttClient(mqttHost, mqttPort, glSvc, dlSvc, gwSvc)
+	mqttClient := mqttSvc.MqttClient(mqttHost, mqttPort, glSvc, dlSvc, gwSvc, eSvc)
 
 	gwHdlr := handlers.NewGatewayHandler(gwSvc, mqttClient)
 	areaHdlr := handlers.NewAreaHandler(areaSvc)
@@ -73,8 +74,10 @@ func main() {
 	sHdlr := handlers.NewStudentHandler(sSvc, mqttClient)
 	eHdlr := handlers.NewEmployeeHandler(eSvc, mqttClient)
 	scheHdlr := handlers.NewSchedulerHandler(scheSvc, mqttClient)
+	cusHdlr := handlers.NewCustomerHandler(cusSvc, mqttClient)
+
 	// HTTP Serve
-	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr, sHdlr, eHdlr, scheHdlr)
+	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr, sHdlr, eHdlr, cusHdlr, scheHdlr)
 	initSwagger(r)
 	r.Run(":8080")
 	mqttClient.Disconnect(250)

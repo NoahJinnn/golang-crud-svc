@@ -22,4 +22,6 @@ const (
 	TOPIC_SV_SCHEDULER_C string = "server/register/create"
 	TOPIC_SV_SCHEDULER_U string = "server/register/update"
 	TOPIC_SV_SCHEDULER_D string = "server/register/delete"
+
+	TOPIC_SV_EMPLOYEE_HP string = "server/employee/hp"
 )

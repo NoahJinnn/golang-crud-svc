@@ -9,14 +9,13 @@ import (
 
 type Employee struct {
 	GormModel
-	MSNV            string      `gorm:"unique; not null;" json:"msnv"`
-	Name            string      `json:"name"`
-	Phone           string      `gorm:"type:varchar(50)" json:"phone"`
-	Email           string      `gorm:"type:varchar(256); not null;" json:"email"`
-	Department      string      `json:"department"`
-	Role            string      `gorm:"not null;" json:"role"`
-	RfidPass        string      `gorm:"type:varchar(256)" json:"rfidPass"`
-	KeypadPass      string      `gorm:"type:varchar(256)" json:"keypadPass"`
+	MSNV       string `gorm:"unique; not null;" json:"msnv" binding:"required"`
+	Name       string `json:"name"`
+	Phone      string `gorm:"type:varchar(50)" json:"phone"`
+	Email      string `gorm:"type:varchar(256); not null;" json:"email"`
+	Department string `json:"department"`
+	Role       string `gorm:"not null;" json:"role"`
+	UserPass
 	HighestPriority bool        `json:"highestPriority"`
 	Schedulers      []Scheduler `gorm:"many2many:employee_schedulers;"`
 }
@@ -49,8 +48,8 @@ func (es *EmployeeSvc) FindEmployeeByID(ctx context.Context, id string) (e *Empl
 	return e, nil
 }
 
-func (es *EmployeeSvc) FindHPEmployee(ctx context.Context) (eL []Employee, err error) {
-	result := es.db.Where("highest_priority", true).Find(&eL)
+func (es *EmployeeSvc) FindAllHPEmployee(ctx context.Context) (eL []Employee, err error) {
+	result := es.db.Where("highest_priority = ?", true).Find(&eL)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -74,4 +73,71 @@ func (es *EmployeeSvc) UpdateEmployee(ctx context.Context, e *Employee) (bool, e
 func (es *EmployeeSvc) DeleteEmployee(ctx context.Context, employeeId uint) (bool, error) {
 	result := es.db.Unscoped().Where("id = ?", employeeId).Delete(&Employee{})
 	return utils.ReturnBoolStateFromResult(result)
+}
+
+func (es *EmployeeSvc) AppendEmployeeScheduler(ctx context.Context, e *Employee, doorSerialId string, sche *Scheduler) (*Employee, error) {
+
+	// Add scheduler for door
+	var door = &Doorlock{}
+	doorResult := es.db.Where("door_serial_id = ?", doorSerialId).First(door)
+	if err := doorResult.Error; err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
+	if err := es.db.Model(door).Association("Schedulers").Append(sche); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
+	// Add scheduler for student
+	if err := es.db.Model(&e).Association("Schedulers").Append(sche); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return e, nil
+}
+
+func (es *EmployeeSvc) UpdateEmployeeScheduler(ctx context.Context, e *Employee, doorSerialId string, sche *Scheduler) (*Employee, error) {
+	// Update scheduler for door
+	var door = &Doorlock{}
+	doorResult := es.db.Where("door_serial_id = ?", doorSerialId).First(door)
+	if err := doorResult.Error; err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
+	if err := es.db.Model(door).Association("Schedulers").Replace(sche); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
+	// Update scheduler for student
+	if err := es.db.Model(&e).Association("Schedulers").Replace(sche); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return e, nil
+}
+
+func (es *EmployeeSvc) DeleteEmployeeScheduler(ctx context.Context, e *Employee, doorSerialId string, sche *Scheduler) (*Employee, error) {
+	// Delete scheduler for door
+	var door = &Doorlock{}
+	doorResult := es.db.Where("door_serial_id = ?", doorSerialId).First(door)
+	if err := doorResult.Error; err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
+	if err := es.db.Model(door).Association("Schedulers").Delete(sche); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
+	// Delete scheduler for student
+	if err := es.db.Model(&e).Association("Schedulers").Delete(sche); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return e, nil
 }

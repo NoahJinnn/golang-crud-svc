@@ -13,6 +13,7 @@ func setupRouter(
 	// pwHdlr *handlers.PasswordHandler,
 	sHdlr *handlers.StudentHandler,
 	eHdlr *handlers.EmployeeHandler,
+	cusHdlr *handlers.CustomerHandler,
 	scheHdlr *handlers.SchedulerHandler,
 ) *gin.Engine {
 	r := gin.Default()
@@ -66,6 +67,19 @@ func setupRouter(
 		v1R.POST("/employee", eHdlr.CreateEmployee)
 		v1R.PATCH("/employee", eHdlr.UpdateEmployee)
 		v1R.DELETE("/employee", eHdlr.DeleteEmployee)
+		v1R.POST("/employee/:id/scheduler", eHdlr.AppendEmployeeScheduler)
+		v1R.PATCH("/employee/:id/scheduler", eHdlr.UpdateEmployeeScheduler)
+		v1R.DELETE("/employee/:id/scheduler", eHdlr.DeleteEmployeeScheduler)
+
+		// Customer routes
+		v1R.GET("/customers", cusHdlr.FindAllCustomer)
+		v1R.GET("/customer/:id", cusHdlr.FindCustomerByID)
+		v1R.POST("/customer", cusHdlr.CreateCustomer)
+		v1R.PATCH("/customer", cusHdlr.UpdateCustomer)
+		v1R.DELETE("/customer", cusHdlr.DeleteCustomer)
+		v1R.POST("/customer/:id/scheduler", cusHdlr.AppendCustomerScheduler)
+		v1R.PATCH("/customer/:id/scheduler", cusHdlr.UpdateCustomerScheduler)
+		v1R.DELETE("/customer/:id/scheduler", cusHdlr.DeleteCustomerScheduler)
 
 		// Scheduler routes
 		v1R.GET("/schedulers", scheHdlr.FindAllScheduler)

@@ -2,6 +2,7 @@ package mqttSvc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -25,7 +26,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	fmt.Printf("Connect lost: %v", err)
 }
 
-func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc) mqtt.Client {
+func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc, empSvc *models.EmployeeSvc) mqtt.Client {
 
 	mqtt.ERROR = log.New(os.Stdout, "[MQTT-ERROR] ", 0)
 	mqtt.CRITICAL = log.New(os.Stdout, "[MQTT-CRIT] ", 0)
@@ -46,12 +47,20 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
-	subGateway(client, logSvc, doorlockSvc, gwSvc)
+	subGateway(client, logSvc, doorlockSvc, gwSvc, empSvc)
 
+	hpEmployees, err := empSvc.FindAllHPEmployee(context.Background())
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(hpEmployees)
+	jsonInfo, _ := json.Marshal(hpEmployees)
+	t := client.Publish(TOPIC_SV_EMPLOYEE_HP, 1, false, jsonInfo)
+	HandleMqttErr(&t)
 	return client
 }
 
-func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc) {
+func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc, empSvc *models.EmployeeSvc) {
 
 	t := client.Subscribe(string(TOPIC_GW_SHUTDOWN), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
@@ -110,6 +119,13 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 	if err := HandleMqttErr(&t); err == nil {
 		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_BOOTUP)
 	}
+
+	// hpEmployees, err := empSvc.FindAllHPEmployee(context.Background())
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
+	// t = client.Publish(TOPIC_SV_EMPLOYEE_HP, 1, false, hpEmployees)
+	// HandleMqttErr(&t)
 
 	t = client.Subscribe(string(TOPIC_GW_LOG_C), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())

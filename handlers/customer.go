@@ -10,32 +10,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type StudentHandler struct {
-	svc  *models.StudentSvc
+type CustomerHandler struct {
+	svc  *models.CustomerSvc
 	mqtt mqtt.Client
 }
 
-func NewStudentHandler(svc *models.StudentSvc, mqtt mqtt.Client) *StudentHandler {
-	return &StudentHandler{
+func NewCustomerHandler(svc *models.CustomerSvc, mqtt mqtt.Client) *CustomerHandler {
+	return &CustomerHandler{
 		svc:  svc,
 		mqtt: mqtt,
 	}
 }
 
-// Find all students info
-// @Summary Find All Student
+// Find all customers info
+// @Summary Find All Customer
 // @Schemes
-// @Description find all students info
+// @Description find all customers info
 // @Produce json
-// @Success 200 {array} []models.Student
+// @Success 200 {array} []models.Customer
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /v1/students [get]
-func (h *StudentHandler) FindAllStudent(c *gin.Context) {
-	sList, err := h.svc.FindAllStudent(c)
+// @Router /v1/customers [get]
+func (h *CustomerHandler) FindAllCustomer(c *gin.Context) {
+	sList, err := h.svc.FindAllCustomer(c)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get all students failed",
+			Msg:        "Get all customers failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -43,43 +43,43 @@ func (h *StudentHandler) FindAllStudent(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, sList)
 }
 
-// Find student info by id
-// @Summary Find Student By ID
+// Find customer info by id
+// @Summary Find Customer By ID
 // @Schemes
-// @Description find student info by student id
+// @Description find customer info by customer id
 // @Produce json
-// @Param        id	path	string	true	"Student ID"
-// @Success 200 {object} models.Student
+// @Param        id	path	string	true	"Customer ID"
+// @Success 200 {object} models.Customer
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /v1/student/{id} [get]
-func (h *StudentHandler) FindStudentByID(c *gin.Context) {
+// @Router /v1/customer/{id} [get]
+func (h *CustomerHandler) FindCustomerByID(c *gin.Context) {
 	id := c.Param("id")
 
-	s, err := h.svc.FindStudentByID(c, id)
+	cus, err := h.svc.FindCustomerByID(c, id)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
+			Msg:        "Get customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, s)
+	utils.ResponseJson(c, http.StatusOK, cus)
 }
 
-// Create student
-// @Summary Create Student
+// Create customer
+// @Summary Create Customer
 // @Schemes
-// @Description Create student
+// @Description Create customer
 // @Accept  json
 // @Produce json
-// @Param	data	body	models.SwagCreateStudent	true	"Fields need to create a student"
-// @Success 200 {object} models.Student
+// @Param	data	body	models.SwagCreateCustomer	true	"Fields need to create a customer"
+// @Success 200 {object} models.Customer
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /v1/student [post]
-func (h *StudentHandler) CreateStudent(c *gin.Context) {
-	s := &models.Student{}
-	err := c.ShouldBind(s)
+// @Router /v1/customer [post]
+func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
+	cus := &models.Customer{}
+	err := c.ShouldBind(cus)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -89,31 +89,31 @@ func (h *StudentHandler) CreateStudent(c *gin.Context) {
 		return
 	}
 
-	_, err = h.svc.CreateStudent(c.Request.Context(), s)
+	_, err = h.svc.CreateCustomer(c.Request.Context(), cus)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Create student failed",
+			Msg:        "Create customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, s)
+	utils.ResponseJson(c, http.StatusOK, cus)
 }
 
-// Update student
-// @Summary Update Student By ID
+// Update customer
+// @Summary Update Customer By ID
 // @Schemes
-// @Description Update student, must have "id" field
+// @Description Update customer, must have "id" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	models.SwagUpdateStudent	true	"Fields need to update a student"
+// @Param	data	body	models.SwagUpdateCustomer	true	"Fields need to update a customer"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /v1/student [patch]
-func (h *StudentHandler) UpdateStudent(c *gin.Context) {
-	s := &models.Student{}
-	err := c.ShouldBind(s)
+// @Router /v1/customer [patch]
+func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
+	cus := &models.Customer{}
+	err := c.ShouldBind(cus)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -123,11 +123,11 @@ func (h *StudentHandler) UpdateStudent(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.UpdateStudent(c.Request.Context(), s)
+	isSuccess, err := h.svc.UpdateCustomer(c.Request.Context(), cus)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
+			Msg:        "Update customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -135,17 +135,17 @@ func (h *StudentHandler) UpdateStudent(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
-// Delete student
-// @Summary Delete Student By ID
+// Delete customer
+// @Summary Delete Customer By ID
 // @Schemes
-// @Description Delete student using "id" field
+// @Description Delete customer using "id" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	object{id=int}	true	"Student ID"
+// @Param	data	body	object{id=int}	true	"Customer ID"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /v1/student [delete]
-func (h *StudentHandler) DeleteStudent(c *gin.Context) {
+// @Router /v1/customer [delete]
+func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 	dId := &models.DeleteID{}
 	err := c.ShouldBind(dId)
 	if err != nil {
@@ -157,11 +157,11 @@ func (h *StudentHandler) DeleteStudent(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteStudent(c.Request.Context(), dId.ID)
+	isSuccess, err := h.svc.DeleteCustomer(c.Request.Context(), dId.ID)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Delete student failed",
+			Msg:        "Delete customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -170,9 +170,9 @@ func (h *StudentHandler) DeleteStudent(c *gin.Context) {
 
 }
 
-func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
+func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
-	sId := c.Param("id")
+	cId := c.Param("id")
 	err := c.ShouldBind(usu)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -183,17 +183,17 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	s, err := h.svc.FindStudentByID(c, sId)
+	cus, err := h.svc.FindCustomerByID(c, cId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
+			Msg:        "Get customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -203,11 +203,11 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	_, err = h.svc.AppendStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
+	_, err = h.svc.AppendCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
+			Msg:        "Update customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -216,9 +216,9 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, true)
 }
 
-func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
+func (h *CustomerHandler) UpdateCustomerScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
-	sId := c.Param("id")
+	cId := c.Param("id")
 	err := c.ShouldBind(usu)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -229,17 +229,17 @@ func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	s, err := h.svc.FindStudentByID(c, sId)
+	cus, err := h.svc.FindCustomerByID(c, cId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
+			Msg:        "Get customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -249,11 +249,11 @@ func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	_, err = h.svc.UpdateStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
+	_, err = h.svc.UpdateCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
+			Msg:        "Update customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -262,9 +262,9 @@ func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, true)
 }
 
-func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
+func (h *CustomerHandler) DeleteCustomerScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
-	sId := c.Param("id")
+	cId := c.Param("id")
 	err := c.ShouldBind(usu)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -275,17 +275,17 @@ func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	s, err := h.svc.FindStudentByID(c, sId)
+	cus, err := h.svc.FindCustomerByID(c, cId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
+			Msg:        "Get customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, s.MSSV))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, cus.CCCD))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -295,11 +295,11 @@ func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	_, err = h.svc.DeleteStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
+	_, err = h.svc.DeleteCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
+			Msg:        "Update customer failed",
 			ErrorMsg:   err.Error(),
 		})
 		return

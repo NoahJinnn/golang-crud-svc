@@ -9,20 +9,13 @@ import (
 
 type Student struct {
 	GormModel
-	MSSV       string      `gorm:"type:varchar(50); unique; not null;" json:"mssv"`
-	Name       string      `json:"name"`
-	Phone      string      `gorm:"type:varchar(50)" json:"phone"`
-	Email      string      `gorm:"type:varchar(256); unique; not null;" json:"email"`
-	Major      string      `gorm:"not null;" json:"major"`
-	RfidPass   string      `gorm:"type:varchar(256)" json:"rfidPass"`
-	KeypadPass string      `gorm:"type:varchar(256)" json:"keypadPass"`
+	MSSV  string `gorm:"type:varchar(50); unique; not null;" json:"mssv"  binding:"required"`
+	Name  string `json:"name"`
+	Phone string `gorm:"type:varchar(50)" json:"phone"`
+	Email string `gorm:"type:varchar(256); unique; not null;" json:"email"`
+	Major string `gorm:"not null;" json:"major"`
+	UserPass
 	Schedulers []Scheduler `gorm:"many2many:student_schedulers;"`
-}
-
-type StudentSchedulerUpsert struct {
-	Scheduler  `json:"scheduler" binding:"required"`
-	GatewayID  string `json:"gatewayId" binding:"required"`
-	DoorlockID string `json:"doorlockId" binding:"required"`
 }
 
 type StudentSvc struct {
@@ -71,7 +64,7 @@ func (ss *StudentSvc) DeleteStudent(ctx context.Context, studentId uint) (bool, 
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (ss *StudentSvc) AppendStudentScheduler(ctx context.Context, sId string, doorSerialId string, sche *Scheduler) (*Student, error) {
+func (ss *StudentSvc) AppendStudentScheduler(ctx context.Context, s *Student, doorSerialId string, sche *Scheduler) (*Student, error) {
 
 	// Add scheduler for door
 	var door = &Doorlock{}
@@ -87,12 +80,6 @@ func (ss *StudentSvc) AppendStudentScheduler(ctx context.Context, sId string, do
 	}
 
 	// Add scheduler for student
-	s, err := ss.FindStudentByID(ctx, sId)
-	if err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
-
 	if err := ss.db.Model(&s).Association("Schedulers").Append(sche); err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -100,7 +87,7 @@ func (ss *StudentSvc) AppendStudentScheduler(ctx context.Context, sId string, do
 	return s, nil
 }
 
-func (ss *StudentSvc) UpdateStudentScheduler(ctx context.Context, sId string, doorSerialId string, sche *Scheduler) (*Student, error) {
+func (ss *StudentSvc) UpdateStudentScheduler(ctx context.Context, s *Student, doorSerialId string, sche *Scheduler) (*Student, error) {
 	// Update scheduler for door
 	var door = &Doorlock{}
 	doorResult := ss.db.Where("door_serial_id = ?", doorSerialId).First(door)
@@ -115,12 +102,6 @@ func (ss *StudentSvc) UpdateStudentScheduler(ctx context.Context, sId string, do
 	}
 
 	// Update scheduler for student
-	s, err := ss.FindStudentByID(ctx, sId)
-	if err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
-
 	if err := ss.db.Model(&s).Association("Schedulers").Replace(sche); err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -128,7 +109,7 @@ func (ss *StudentSvc) UpdateStudentScheduler(ctx context.Context, sId string, do
 	return s, nil
 }
 
-func (ss *StudentSvc) DeleteStudentScheduler(ctx context.Context, sId string, doorSerialId string, sche *Scheduler) (*Student, error) {
+func (ss *StudentSvc) DeleteStudentScheduler(ctx context.Context, s *Student, doorSerialId string, sche *Scheduler) (*Student, error) {
 	// Delete scheduler for door
 	var door = &Doorlock{}
 	doorResult := ss.db.Where("door_serial_id = ?", doorSerialId).First(door)
@@ -143,12 +124,6 @@ func (ss *StudentSvc) DeleteStudentScheduler(ctx context.Context, sId string, do
 	}
 
 	// Delete scheduler for student
-	s, err := ss.FindStudentByID(ctx, sId)
-	if err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
-
 	if err := ss.db.Model(&s).Association("Schedulers").Delete(sche); err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err

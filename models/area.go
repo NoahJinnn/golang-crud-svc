@@ -9,9 +9,8 @@ import (
 
 type Area struct {
 	GormModel
-	Name    string  `gorm:"unique;not null" json:"name"`
-	Manager string  `gorm:"not null" json:"manager"`
-	Gateway Gateway `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"gateway"`
+	Name    string `gorm:"unique;not null" json:"name"`
+	Manager string `gorm:"not null" json:"manager"`
 }
 type AreaSvc struct {
 	db *gorm.DB
