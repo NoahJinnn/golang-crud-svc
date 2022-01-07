@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
@@ -187,15 +185,16 @@ func (h *DoorlockHandler) UpdateDoorlockCmd(c *gin.Context) {
 		return
 	}
 
-	isMqttReps := waitForMqttDoorlockResponse(c, 60)
-	if !isMqttReps {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Mqtt response is too long",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+	// TODO: Guarantee mqtt req/res
+	// isMqttReps := waitForMqttDoorlockResponse(c, 60)
+	// if !isMqttReps {
+	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+	// 		StatusCode: http.StatusBadRequest,
+	// 		Msg:        "Mqtt response is too long",
+	// 		ErrorMsg:   err.Error(),
+	// 	})
+	// 	return
+	// }
 	utils.ResponseJson(c, http.StatusOK, true)
 }
 
@@ -231,15 +230,16 @@ func (h *DoorlockHandler) DeleteDoorlock(c *gin.Context) {
 		return
 	}
 
-	isMqttReps := waitForMqttDoorlockResponse(c, 60)
-	if !isMqttReps {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Mqtt response is too long",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+	// TODO: Guarantee mqtt req/res
+	// isMqttReps := waitForMqttDoorlockResponse(c, 60)
+	// if !isMqttReps {
+	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+	// 		StatusCode: http.StatusBadRequest,
+	// 		Msg:        "Mqtt response is too long",
+	// 		ErrorMsg:   err.Error(),
+	// 	})
+	// 	return
+	// }
 
 	isSuccess, err := h.svc.DeleteDoorlock(c.Request.Context(), dl.DoorSerialID)
 	if err != nil || !isSuccess {
@@ -254,22 +254,23 @@ func (h *DoorlockHandler) DeleteDoorlock(c *gin.Context) {
 
 }
 
-func waitForMqttDoorlockResponse(c *gin.Context, waitSecond uint) bool {
-	// Clear previous check read state
-	select {
-	case <-mqttSvc.DoorlockStateCheck:
-		fmt.Println("[MQTT-INFO] Clear doorlock state check flag")
-	default:
-	}
+// TODO: Guarantee mqtt req/res
+// func waitForMqttDoorlockResponse(c *gin.Context, waitSecond uint) bool {
+// 	// Clear previous check read state
+// 	select {
+// 	case <-mqttSvc.DoorlockStateCheck:
+// 		fmt.Println("[MQTT-INFO] Clear doorlock state check flag")
+// 	default:
+// 	}
 
-	for start := time.Now(); time.Since(start) < time.Duration(waitSecond)*time.Second; {
-		select {
-		case <-mqttSvc.DoorlockStateCheck:
-			return true
-		default:
-			fmt.Println("[MQTT-INFO] Checking doorlock state from mqtt")
+// 	for start := time.Now(); time.Since(start) < time.Duration(waitSecond)*time.Second; {
+// 		select {
+// 		case <-mqttSvc.DoorlockStateCheck:
+// 			return true
+// 		default:
+// 			fmt.Println("[MQTT-INFO] Checking doorlock state from mqtt")
 
-		}
-	}
-	return false
-}
+// 		}
+// 	}
+// 	return false
+// }

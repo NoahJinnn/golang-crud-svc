@@ -2,7 +2,6 @@ package mqttSvc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -12,7 +11,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var DoorlockStateCheck = make(chan bool)
+// TODO: Guarantee mqtt req/res
+// var DoorlockStateCheck = make(chan bool)
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
@@ -32,7 +32,7 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 	mqtt.CRITICAL = log.New(os.Stdout, "[MQTT-CRIT] ", 0)
 	mqtt.WARN = log.New(os.Stdout, "[MQTT-WARN]  ", 0)
 
-	//Enable when need DEBUG
+	//* Enable when need DEBUG
 	// mqtt.DEBUG = log.New(os.Stdout, "[MQTT-DEBUG] "+host+":"+port, 0)
 
 	opts := mqtt.NewClientOptions()
@@ -49,14 +49,6 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 	}
 	subGateway(client, logSvc, doorlockSvc, gwSvc, empSvc)
 
-	hpEmployees, err := empSvc.FindAllHPEmployee(context.Background())
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Println(hpEmployees)
-	jsonInfo, _ := json.Marshal(hpEmployees)
-	t := client.Publish(TOPIC_SV_EMPLOYEE_HP, 1, false, jsonInfo)
-	HandleMqttErr(&t)
 	return client
 }
 
@@ -79,12 +71,12 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 	t = client.Subscribe(string(TOPIC_GW_BOOTUP), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
+		newGw := &models.Gateway{}
 		gwId := gjson.Get(payloadStr, "gateway_id")
-		users := gjson.Get(payloadStr, "message.users")
-		if users.Exists() {
-			for _, v := range users.Array() {
-				fmt.Printf("%s %s", v.Get("name"), v.Get("age"))
-			}
+		checkGw, _ := gwSvc.FindGatewayByMacID(context.Background(), gwId.String())
+		if checkGw == nil {
+			newGw.GatewayID = gwId.String()
+			gwSvc.CreateGateway(context.Background(), newGw)
 		}
 
 		doorlocks := gjson.Get(payloadStr, "message.doorlocks")
@@ -107,12 +99,17 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 				checkDl, _ := doorlockSvc.FindDoorlockBySerialID(context.Background(), doorID.String())
 				if checkDl == nil {
 					doorlockSvc.CreateDoorlock(context.Background(), dl)
-					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, gwId.Str)
-				} else {
-					doorlockSvc.UpdateDoorlockGateway(context.Background(), dl, gwId.Str)
 				}
 			}
 		}
+
+		hpEmployees, err := empSvc.FindAllHPEmployee(context.Background())
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		t := client.Publish(TOPIC_SV_HP_BOOTUP, 1, false, ServerBootuptHPEmployeePayload(gwId.Str, hpEmployees))
+		HandleMqttErr(&t)
 
 	})
 
@@ -124,7 +121,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 	// if err != nil {
 	// 	fmt.Println(err.Error())
 	// }
-	// t = client.Publish(TOPIC_SV_EMPLOYEE_HP, 1, false, hpEmployees)
+	// t = client.Publish(TOPIC_SV_HP_BOOTUP, 1, false, hpEmployees)
 	// HandleMqttErr(&t)
 
 	t = client.Subscribe(string(TOPIC_GW_LOG_C), 1, func(client mqtt.Client, msg mqtt.Message) {
@@ -146,23 +143,25 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 		fmt.Printf("Subscribed to topic %s", TOPIC_GW_LOG_C)
 	}
 
-	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_STATUS), 1, func(client mqtt.Client, msg mqtt.Message) {
-		var payloadStr = string(msg.Payload())
-		status := gjson.Get(payloadStr, "status")
-		action := gjson.Get(payloadStr, "action")
-		fmt.Printf("[MQTT-INFO] Action %s is %s", action, status)
+	// TODO: Guarantee mqtt req/res
+	// t = client.Subscribe(string(TOPIC_GW_DOORLOCK_STATUS), 1, func(client mqtt.Client, msg mqtt.Message) {
+	// 	var payloadStr = string(msg.Payload())
+	// 	status := gjson.Get(payloadStr, "status")
+	// 	action := gjson.Get(payloadStr, "action")
+	// 	fmt.Printf("[MQTT-INFO] Action %s is %s", action, status)
 
-		DoorlockStateCheck <- true
-	})
+	// 	DoorlockStateCheck <- true
+	// })
 
-	if err := HandleMqttErr(&t); err == nil {
-		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_DOORLOCK_STATUS)
-	}
+	// if err := HandleMqttErr(&t); err == nil {
+	// 	fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_DOORLOCK_STATUS)
+	// }
 
 	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_U), 1, func(client mqtt.Client, msg mqtt.Message) {
 		dl := parseDoorlockPayload(msg)
 		doorlockSvc.UpdateDoorlock(context.Background(), dl)
-		DoorlockStateCheck <- true
+		// TODO: Guarantee mqtt req/res
+		// DoorlockStateCheck <- true
 	})
 
 	if err := HandleMqttErr(&t); err == nil {

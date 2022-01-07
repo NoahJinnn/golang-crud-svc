@@ -87,11 +87,6 @@ func (dls *DoorlockSvc) UpdateDoorlock(ctx context.Context, dl *Doorlock) (bool,
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (dls *DoorlockSvc) UpdateDoorlockGateway(ctx context.Context, dl *Doorlock, gwID string) (bool, error) {
-	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Update("gateway_id", gwID)
-	return utils.ReturnBoolStateFromResult(result)
-}
-
 func (dls *DoorlockSvc) DeleteDoorlock(ctx context.Context, doorSerialId string) (bool, error) {
 	result := dls.db.Unscoped().Where("door_serial_id = ?", doorSerialId).Delete(&Doorlock{})
 	return utils.ReturnBoolStateFromResult(result)

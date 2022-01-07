@@ -12,7 +12,7 @@ type Gateway struct {
 	GormModel
 	AreaID          uint       `json:"areaId"`
 	GatewayID       string     `gorm:"type:varchar(256);unique;not null;" json:"gatewayId"`
-	Name            string     `gorm:"unique;not null" json:"name"`
+	Name            string     `json:"name"`
 	LastConnectTime time.Time  `json:"lastConnectTime"`
 	State           string     `gorm:"not null" json:"state"`
 	Doorlocks       []Doorlock `gorm:"foreignKey:GatewayID;references:GatewayID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
@@ -46,6 +46,15 @@ func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id string) (gw *Gatew
 	return gw, nil
 }
 
+func (gs *GatewaySvc) FindGatewayByMacID(ctx context.Context, id string) (gw *Gateway, err error) {
+	result := gs.db.Where("gateway_id = ?", id).Find(&gw)
+	if err := result.Error; err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return gw, nil
+}
+
 func (gs *GatewaySvc) CreateGateway(ctx context.Context, g *Gateway) (*Gateway, error) {
 	if err := gs.db.Create(&g).Error; err != nil {
 		err = utils.HandleQueryError(err)
@@ -68,4 +77,28 @@ func (gs *GatewaySvc) DeleteGateway(ctx context.Context, gwId uint) (bool, error
 func (gs *GatewaySvc) DeleteGatewayByMacId(ctx context.Context, g *Gateway) (bool, error) {
 	result := gs.db.Unscoped().Where("gateway_id = ?", g.GatewayID).Delete(g)
 	return utils.ReturnBoolStateFromResult(result)
+}
+
+func (gs *GatewaySvc) AppendGatewayDoorlock(ctx context.Context, gw *Gateway, d *Doorlock) (*Gateway, error) {
+	if err := gs.db.Model(&gw).Association("Doorlocks").Append(d); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return gw, nil
+}
+
+func (gs *GatewaySvc) UpdateGatewayDoorlock(ctx context.Context, gw *Gateway, d *Doorlock) (*Gateway, error) {
+	if err := gs.db.Model(&gw).Association("Doorlocks").Replace(d); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return gw, nil
+}
+
+func (gs *GatewaySvc) DeleteGatewayDoorlock(ctx context.Context, gw *Gateway, d *Doorlock) (*Gateway, error) {
+	if err := gs.db.Model(&gw).Association("Doorlocks").Delete(d); err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+	return gw, nil
 }

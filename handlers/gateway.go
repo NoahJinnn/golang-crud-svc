@@ -187,5 +187,40 @@ func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
 		return
 	}
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
+}
 
+func (h *GatewayHandler) DeleteGatewayDoorlock(c *gin.Context) {
+	d := &models.Doorlock{}
+	gwId := c.Param("id")
+	err := c.ShouldBind(d)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Invalid req body",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	gw, err := h.svc.FindGatewayByID(c, gwId)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Get student failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	_, err = h.svc.DeleteGatewayDoorlock(c.Request.Context(), gw, d)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update student failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	utils.ResponseJson(c, http.StatusOK, true)
 }
