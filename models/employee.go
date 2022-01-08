@@ -20,6 +20,10 @@ type Employee struct {
 	Schedulers      []Scheduler `gorm:"many2many:employee_schedulers;"`
 }
 
+type DeleteEmployee struct {
+	MSNV string `json:"msnv" binding:"required"`
+}
+
 type EmployeeSvc struct {
 	db *gorm.DB
 }

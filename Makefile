@@ -1,4 +1,5 @@
 .PHONY: swagger deploy
+# Remember to adjust env file and main.go before make
 swagger:
 	swag init --parseDependency --parseInternal
 build:

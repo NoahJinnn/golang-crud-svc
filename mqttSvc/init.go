@@ -37,7 +37,7 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%s", host, port))
-	opts.SetClientID("go_mqtt_client_1")
+	opts.SetClientID("go_mqtt_client_99")
 	// opts.SetUsername("emqx")
 	// opts.SetPassword("public")
 	opts.SetDefaultPublishHandler(messagePubHandler)

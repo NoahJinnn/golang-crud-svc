@@ -202,9 +202,18 @@ func (h *EmployeeHandler) UpdateHPEmployee(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/employee [delete]
 func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
-	msnv := c.Param("msnv")
+	de := &models.DeleteEmployee{}
+	err := c.ShouldBind(de)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Invalid req body",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_D, 1, false, mqttSvc.ServerDeleteUserPayload("0", msnv))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_D, 1, false, mqttSvc.ServerDeleteUserPayload("0", de.MSNV))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -214,7 +223,7 @@ func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteEmployee(c.Request.Context(), msnv)
+	isSuccess, err := h.svc.DeleteEmployee(c.Request.Context(), de.MSNV)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
