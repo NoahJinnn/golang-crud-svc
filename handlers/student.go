@@ -193,7 +193,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -239,7 +239,7 @@ func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -285,15 +285,15 @@ func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, s.MSSV))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Delete scheduler mqtt failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+	// t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, s.MSSV))
+	// if err := mqttSvc.HandleMqttErr(&t); err != nil {
+	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+	// 		StatusCode: http.StatusBadRequest,
+	// 		Msg:        "Delete scheduler mqtt failed",
+	// 		ErrorMsg:   err.Error(),
+	// 	})
+	// 	return
+	// }
 
 	_, err = h.svc.DeleteStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
 	if err != nil {

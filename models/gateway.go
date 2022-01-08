@@ -47,11 +47,17 @@ func (gs *GatewaySvc) FindGatewayByID(ctx context.Context, id string) (gw *Gatew
 }
 
 func (gs *GatewaySvc) FindGatewayByMacID(ctx context.Context, id string) (gw *Gateway, err error) {
-	result := gs.db.Where("gateway_id = ?", id).Find(&gw)
+	var cnt int64
+	result := gs.db.Where("gateway_id = ?", id).Find(&gw).Count(&cnt)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
 	}
+
+	if cnt <= 0 {
+		return nil, nil
+	}
+
 	return gw, nil
 }
 

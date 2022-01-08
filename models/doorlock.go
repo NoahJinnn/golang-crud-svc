@@ -11,7 +11,7 @@ import (
 type Doorlock struct {
 	GormModel
 	DoorSerialID    string      `gorm:"unique;not null" json:"doorSerialId"`
-	Location        string      `gorm:"unique;not null" json:"location"`
+	Location        string      `json:"location"`
 	State           string      `gorm:"not null" json:"state"`
 	Description     string      `json:"description"`
 	LastConnectTime time.Time   `json:"lastConnectTime"`
@@ -22,7 +22,7 @@ type Doorlock struct {
 type DoorlockCmd struct {
 	DoorSerialID string `json:"doorSerialId"`
 	GatewayID    string `json:"gatewayId"`
-	Command      string `json:"command"`
+	State        string `json:"state"`
 }
 
 type DoorlockDelete struct {
@@ -66,11 +66,17 @@ func (dls *DoorlockSvc) FindDoorlockByID(ctx context.Context, id string) (dl *Do
 }
 
 func (dls *DoorlockSvc) FindDoorlockBySerialID(ctx context.Context, serialiId string) (dl *Doorlock, err error) {
-	result := dls.db.Preload("Schedulers").Where("door_serial_id = ?", serialiId).Find(&dl)
+	var cnt int64
+	result := dls.db.Preload("Schedulers").Where("door_serial_id = ?", serialiId).Find(&dl).Count(&cnt)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
 	}
+
+	if cnt <= 0 {
+		return nil, nil
+	}
+
 	return dl, nil
 }
 
@@ -84,6 +90,11 @@ func (dls *DoorlockSvc) CreateDoorlock(ctx context.Context, dl *Doorlock) (*Door
 
 func (dls *DoorlockSvc) UpdateDoorlock(ctx context.Context, dl *Doorlock) (bool, error) {
 	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Updates(dl)
+	return utils.ReturnBoolStateFromResult(result)
+}
+
+func (dls *DoorlockSvc) UpdateDoorlockState(ctx context.Context, dl *DoorlockCmd) (bool, error) {
+	result := dls.db.Model(&Doorlock{}).Where("door_serial_id = ?", dl.DoorSerialID).Update("state", dl.State)
 	return utils.ReturnBoolStateFromResult(result)
 }
 

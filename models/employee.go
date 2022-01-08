@@ -70,8 +70,18 @@ func (es *EmployeeSvc) UpdateEmployee(ctx context.Context, e *Employee) (bool, e
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (es *EmployeeSvc) DeleteEmployee(ctx context.Context, employeeId uint) (bool, error) {
-	result := es.db.Unscoped().Where("id = ?", employeeId).Delete(&Employee{})
+func (es *EmployeeSvc) UpdateHPEmployee(ctx context.Context, e *Employee) (bool, error) {
+	result := es.db.Model(&e).Where("id = ? AND highest_priority = ?", e.ID, true).Updates(e)
+	return utils.ReturnBoolStateFromResult(result)
+}
+
+func (es *EmployeeSvc) DeleteEmployee(ctx context.Context, msnv string) (bool, error) {
+	result := es.db.Unscoped().Where("msnv = ?", msnv).Delete(&Employee{})
+	return utils.ReturnBoolStateFromResult(result)
+}
+
+func (es *EmployeeSvc) DeleteHPEmployee(ctx context.Context, msnv string) (bool, error) {
+	result := es.db.Unscoped().Where("msnv = ? AND highest_priority = ?", msnv, true).Delete(&Employee{})
 	return utils.ReturnBoolStateFromResult(result)
 }
 

@@ -193,7 +193,7 @@ func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -239,15 +239,15 @@ func (h *CustomerHandler) UpdateCustomerScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerUpsertRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update scheduler mqtt failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+	// t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
+	// if err := mqttSvc.HandleMqttErr(&t); err != nil {
+	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+	// 		StatusCode: http.StatusBadRequest,
+	// 		Msg:        "Update scheduler mqtt failed",
+	// 		ErrorMsg:   err.Error(),
+	// 	})
+	// 	return
+	// }
 
 	_, err = h.svc.UpdateCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
 	if err != nil {
@@ -285,15 +285,15 @@ func (h *CustomerHandler) DeleteCustomerScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, cus.CCCD))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Delete scheduler mqtt failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+	// t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, cus.CCCD))
+	// if err := mqttSvc.HandleMqttErr(&t); err != nil {
+	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+	// 		StatusCode: http.StatusBadRequest,
+	// 		Msg:        "Delete scheduler mqtt failed",
+	// 		ErrorMsg:   err.Error(),
+	// 	})
+	// 	return
+	// }
 
 	_, err = h.svc.DeleteCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
 	if err != nil {

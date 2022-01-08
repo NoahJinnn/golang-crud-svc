@@ -96,6 +96,19 @@ func (h *DoorlockHandler) CreateDoorlock(c *gin.Context) {
 		})
 		return
 	}
+
+	t := h.mqtt.Publish(string(mqttSvc.TOPIC_SV_DOORLOCK_C), 1, false,
+		mqttSvc.ServerCreateDoorlockPayload(dl),
+	)
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Create doorlock mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	dl, err = h.svc.CreateDoorlock(c.Request.Context(), dl)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -175,7 +188,8 @@ func (h *DoorlockHandler) UpdateDoorlockCmd(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(string(mqttSvc.TOPIC_SV_DOORLOCK_CMD), 1, false, mqttSvc.ServerCmdDoorlockPayload(dl.GatewayID, dl.DoorSerialID, dl.Command))
+	t := h.mqtt.Publish(string(mqttSvc.TOPIC_SV_DOORLOCK_CMD), 1, false,
+		mqttSvc.ServerCmdDoorlockPayload(dl.GatewayID, dl.DoorSerialID, dl.State))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -195,7 +209,18 @@ func (h *DoorlockHandler) UpdateDoorlockCmd(c *gin.Context) {
 	// 	})
 	// 	return
 	// }
-	utils.ResponseJson(c, http.StatusOK, true)
+
+	isSuccess, err := h.svc.UpdateDoorlockState(c.Request.Context(), dl)
+	if err != nil || !isSuccess {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update doorlock failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
 // Delete doorlock
@@ -220,7 +245,8 @@ func (h *DoorlockHandler) DeleteDoorlock(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_DOORLOCK_D, 1, false, mqttSvc.ServerDeleteDoorlockPayload(dl))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_DOORLOCK_D, 1, false,
+		mqttSvc.ServerDeleteDoorlockPayload(dl))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

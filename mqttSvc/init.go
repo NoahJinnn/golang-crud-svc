@@ -71,24 +71,28 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 	t = client.Subscribe(string(TOPIC_GW_BOOTUP), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
+		fmt.Println(payloadStr)
 		newGw := &models.Gateway{}
 		gwId := gjson.Get(payloadStr, "gateway_id")
+		gwState := gjson.Get(payloadStr, "state")
 		checkGw, _ := gwSvc.FindGatewayByMacID(context.Background(), gwId.String())
 		if checkGw == nil {
 			newGw.GatewayID = gwId.String()
+			newGw.State = gwState.String()
 			gwSvc.CreateGateway(context.Background(), newGw)
 		}
 
 		doorlocks := gjson.Get(payloadStr, "message.doorlocks")
 		if doorlocks.Exists() {
 			for _, v := range doorlocks.Array() {
-				doorID := v.Get("door_id")
+				doorID := v.Get("doorlock_id")
 				location := v.Get("location")
 				state := v.Get("state")
 				description := v.Get("description")
 				lastConnectTime := v.Get("last_connect_time")
 
 				dl := &models.Doorlock{
+					DoorSerialID:    doorID.String(),
 					State:           state.String(),
 					Location:        location.String(),
 					GatewayID:       gwId.String(),
@@ -108,7 +112,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 			fmt.Println(err.Error())
 		}
 
-		t := client.Publish(TOPIC_SV_HP_BOOTUP, 1, false, ServerBootuptHPEmployeePayload(gwId.Str, hpEmployees))
+		t := client.Publish(TOPIC_SV_HP_BOOTUP, 1, false, ServerBootuptHPEmployeePayload(gwId.String(), hpEmployees))
 		HandleMqttErr(&t)
 
 	})
@@ -117,19 +121,14 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 		fmt.Printf("[MQTT-INFO] Subscribed to topic %s", TOPIC_GW_BOOTUP)
 	}
 
-	// hpEmployees, err := empSvc.FindAllHPEmployee(context.Background())
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
-	// t = client.Publish(TOPIC_SV_HP_BOOTUP, 1, false, hpEmployees)
-	// HandleMqttErr(&t)
-
 	t = client.Subscribe(string(TOPIC_GW_LOG_C), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
-		gatewayId := gjson.Get(payloadStr, "gateway_id")
-		logType := gjson.Get(payloadStr, "log_type")
-		content := gjson.Get(payloadStr, "content")
-		logTime := gjson.Get(payloadStr, "log_time")
+
+		logMsg := gjson.Get(payloadStr, "message").String()
+		gatewayId := gjson.Get(logMsg, "gateway_id")
+		logType := gjson.Get(logMsg, "log_type")
+		content := gjson.Get(logMsg, "log_data")
+		logTime := gjson.Get(logMsg, "log_time")
 		fmt.Printf(" %s: %s \n", msg.Topic(), payloadStr)
 		logSvc.CreateGatewayLog(context.Background(), &models.GatewayLog{
 			GatewayID: gatewayId.String(),
@@ -158,8 +157,15 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 	// }
 
 	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_U), 1, func(client mqtt.Client, msg mqtt.Message) {
-		dl := parseDoorlockPayload(msg)
-		doorlockSvc.UpdateDoorlock(context.Background(), dl)
+		var payloadStr = string(msg.Payload())
+
+		doorStateMsg := gjson.Get(payloadStr, "message").String()
+		doorId := gjson.Get(doorStateMsg, "doorlock_id")
+		state := gjson.Get(doorStateMsg, "state")
+		doorlockSvc.UpdateDoorlockState(context.Background(), &models.DoorlockCmd{
+			DoorSerialID: doorId.String(),
+			State:        state.String(),
+		})
 		// TODO: Guarantee mqtt req/res
 		// DoorlockStateCheck <- true
 	})
@@ -179,7 +185,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 	t = client.Subscribe(string(TOPIC_GW_DOORLOCK_D), 1, func(client mqtt.Client, msg mqtt.Message) {
 		var payloadStr = string(msg.Payload())
-		doorId := gjson.Get(payloadStr, "door_id")
+		doorId := gjson.Get(payloadStr, "doorlock_id")
 		doorlockSvc.DeleteDoorlock(context.Background(), doorId.String())
 	})
 
@@ -190,10 +196,10 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 func parseDoorlockPayload(msg mqtt.Message) *models.Doorlock {
 	var payloadStr = string(msg.Payload())
-	doorId := gjson.Get(payloadStr, "door_id")
+	doorId := gjson.Get(payloadStr, "doorlock_id")
+	state := gjson.Get(payloadStr, "state")
 	description := gjson.Get(payloadStr, "description")
 	location := gjson.Get(payloadStr, "location")
-	state := gjson.Get(payloadStr, "state")
 	fmt.Printf(" %s: %s \n", msg.Topic(), payloadStr)
 
 	dl := &models.Doorlock{

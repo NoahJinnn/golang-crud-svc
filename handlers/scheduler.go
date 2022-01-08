@@ -5,6 +5,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ecoprohcm/DMS_BackendServer/models"
+	"github.com/ecoprohcm/DMS_BackendServer/mqttSvc"
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -122,6 +123,16 @@ func (h *SchedulerHandler) UpdateScheduler(c *gin.Context) {
 		return
 	}
 
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_U, 1, false, mqttSvc.ServerUpdateRegisterPayload("0", s))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update scheduler mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	isSuccess, err := h.svc.UpdateScheduler(c.Request.Context(), s)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -151,6 +162,16 @@ func (h *SchedulerHandler) DeleteScheduler(c *gin.Context) {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Msg:        "Invalid req body",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_D, 1, false, mqttSvc.ServerDeleteRegisterPayload("0", dId.ID))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Delete scheduler mqtt failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
