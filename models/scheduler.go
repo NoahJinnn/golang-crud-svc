@@ -25,6 +25,16 @@ type Scheduler struct {
 	EndClassTime   uint   `json:"endClassTime"`
 	Amount         uint   `json:"amount"`
 	Status         string `json:"status"`
+	DoorSerialID   string `gorm:"type:varchar(256);" json:"doorSerialId"`
+	EmployeeID     string `gorm:"type:varchar(256);" json:"employeeId"`
+	StudentID      string `gorm:"type:varchar(256);" json:"studentId"`
+	CustomerID     string `gorm:"type:varchar(256);" json:"customerId"`
+}
+
+type UpdateScheduler struct {
+	UserID       string `json:"userId" binding:"required"`
+	DoorSerialID string `json:"doorSerialId" binding:"required"`
+	Scheduler    `binding:"required"`
 }
 
 type SchedulerSvc struct {

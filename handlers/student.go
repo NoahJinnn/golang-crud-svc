@@ -43,19 +43,19 @@ func (h *StudentHandler) FindAllStudent(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, sList)
 }
 
-// Find student info by id
-// @Summary Find Student By ID
+// Find student info by mssv
+// @Summary Find Student By MSSV
 // @Schemes
-// @Description find student info by student id
+// @Description find student info by student mssv
 // @Produce json
-// @Param        id	path	string	true	"Student ID"
+// @Param        mssv	path	string	true	"Student MSSV"
 // @Success 200 {object} models.Student
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /v1/student/{id} [get]
-func (h *StudentHandler) FindStudentByID(c *gin.Context) {
-	id := c.Param("id")
+// @Router /v1/student/{mssv} [get]
+func (h *StudentHandler) FindStudentByMSSV(c *gin.Context) {
+	mssv := c.Param("mssv")
 
-	s, err := h.svc.FindStudentByID(c, id)
+	s, err := h.svc.FindStudentByMSSV(c, mssv)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -104,7 +104,7 @@ func (h *StudentHandler) CreateStudent(c *gin.Context) {
 // Update student
 // @Summary Update Student By ID
 // @Schemes
-// @Description Update student, must have "id" field
+// @Description Update student, must have "mssv" field
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.SwagUpdateStudent	true	"Fields need to update a student"
@@ -138,7 +138,7 @@ func (h *StudentHandler) UpdateStudent(c *gin.Context) {
 // Delete student
 // @Summary Delete Student By ID
 // @Schemes
-// @Description Delete student using "id" field
+// @Description Delete student using "mssv" field
 // @Accept  json
 // @Produce json
 // @Param	data	body	object{id=int}	true	"Student ID"
@@ -172,7 +172,7 @@ func (h *StudentHandler) DeleteStudent(c *gin.Context) {
 
 func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
-	sId := c.Param("id")
+	sId := c.Param("mssv")
 	err := c.ShouldBind(usu)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -183,7 +183,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	s, err := h.svc.FindStudentByID(c, sId)
+	s, err := h.svc.FindStudentByMSSV(c, sId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -216,94 +216,94 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, true)
 }
 
-func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
-	usu := &models.UserSchedulerUpsert{}
-	sId := c.Param("id")
-	err := c.ShouldBind(usu)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Invalid req body",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
+// 	usu := &models.UserSchedulerUpsert{}
+// 	sId := c.Param("mssv")
+// 	err := c.ShouldBind(usu)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Invalid req body",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	s, err := h.svc.FindStudentByID(c, sId)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	s, err := h.svc.FindStudentByMSSV(c, sId)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Get student failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update scheduler mqtt failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, s.RfidPass, s.KeypadPass, s.MSSV))
+// 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Update scheduler mqtt failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	_, err = h.svc.UpdateStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	_, err = h.svc.UpdateStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Update student failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	utils.ResponseJson(c, http.StatusOK, true)
-}
+// 	utils.ResponseJson(c, http.StatusOK, true)
+// }
 
-func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
-	usu := &models.UserSchedulerUpsert{}
-	sId := c.Param("id")
-	err := c.ShouldBind(usu)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Invalid req body",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
+// 	usu := &models.UserSchedulerUpsert{}
+// 	sId := c.Param("mssv")
+// 	err := c.ShouldBind(usu)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Invalid req body",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	s, err := h.svc.FindStudentByID(c, sId)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	s, err := h.svc.FindStudentByMSSV(c, sId)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Get student failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	// t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, s.MSSV))
-	// if err := mqttSvc.HandleMqttErr(&t); err != nil {
-	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-	// 		StatusCode: http.StatusBadRequest,
-	// 		Msg:        "Delete scheduler mqtt failed",
-	// 		ErrorMsg:   err.Error(),
-	// 	})
-	// 	return
-	// }
+// 	// t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, s.MSSV))
+// 	// if err := mqttSvc.HandleMqttErr(&t); err != nil {
+// 	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 	// 		StatusCode: http.StatusBadRequest,
+// 	// 		Msg:        "Delete scheduler mqtt failed",
+// 	// 		ErrorMsg:   err.Error(),
+// 	// 	})
+// 	// 	return
+// 	// }
 
-	_, err = h.svc.DeleteStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	_, err = h.svc.DeleteStudentScheduler(c.Request.Context(), s, usu.DoorlockID, &usu.Scheduler)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Update student failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	utils.ResponseJson(c, http.StatusOK, true)
-}
+// 	utils.ResponseJson(c, http.StatusOK, true)
+// }

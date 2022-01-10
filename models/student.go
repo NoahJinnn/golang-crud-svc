@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"gorm.io/gorm"
@@ -9,13 +10,13 @@ import (
 
 type Student struct {
 	GormModel
-	MSSV  string `gorm:"type:varchar(50); unique; not null;" json:"mssv"  binding:"required"`
+	MSSV  string `gorm:"type:varchar(256); unique; not null;" json:"mssv"  binding:"required"`
 	Name  string `json:"name"`
 	Phone string `gorm:"type:varchar(50)" json:"phone"`
 	Email string `gorm:"type:varchar(256); unique; not null;" json:"email"`
 	Major string `gorm:"not null;" json:"major"`
 	UserPass
-	Schedulers []Scheduler `gorm:"many2many:student_schedulers;"`
+	Schedulers []Scheduler `gorm:"foreignKey:StudentID;references:MSSV;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
 type StudentSvc struct {
@@ -37,12 +38,18 @@ func (ss *StudentSvc) FindAllStudent(ctx context.Context) (sList []Student, err 
 	return sList, nil
 }
 
-func (ss *StudentSvc) FindStudentByID(ctx context.Context, id string) (s *Student, err error) {
-	result := ss.db.Preload("Schedulers").First(&s, id)
+func (ss *StudentSvc) FindStudentByMSSV(ctx context.Context, mssv string) (s *Student, err error) {
+	var cnt int64
+	result := ss.db.Preload("Schedulers").Where("mssv = ?", mssv).Find(&s).Count(&cnt)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
 	}
+
+	if cnt <= 0 {
+		return nil, fmt.Errorf("find no records")
+	}
+
 	return s, nil
 }
 
@@ -87,46 +94,46 @@ func (ss *StudentSvc) AppendStudentScheduler(ctx context.Context, s *Student, do
 	return s, nil
 }
 
-func (ss *StudentSvc) UpdateStudentScheduler(ctx context.Context, s *Student, doorSerialId string, sche *Scheduler) (*Student, error) {
-	// Update scheduler for door
-	var door = &Doorlock{}
-	doorResult := ss.db.Where("door_serial_id = ?", doorSerialId).First(door)
-	if err := doorResult.Error; err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// func (ss *StudentSvc) UpdateStudentScheduler(ctx context.Context, s *Student, doorSerialId string, sche *Scheduler) (*Student, error) {
+// 	// Update scheduler for door
+// 	var door = &Doorlock{}
+// 	doorResult := ss.db.Where("door_serial_id = ?", doorSerialId).First(door)
+// 	if err := doorResult.Error; err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	if err := ss.db.Model(door).Association("Schedulers").Replace(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// 	if err := ss.db.Model(door).Association("Schedulers").Replace(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	// Update scheduler for student
-	if err := ss.db.Model(&s).Association("Schedulers").Replace(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
-	return s, nil
-}
+// 	// Update scheduler for student
+// 	if err := ss.db.Model(&s).Association("Schedulers").Replace(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
+// 	return s, nil
+// }
 
-func (ss *StudentSvc) DeleteStudentScheduler(ctx context.Context, s *Student, doorSerialId string, sche *Scheduler) (*Student, error) {
-	// Delete scheduler for door
-	var door = &Doorlock{}
-	doorResult := ss.db.Where("door_serial_id = ?", doorSerialId).First(door)
-	if err := doorResult.Error; err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// func (ss *StudentSvc) DeleteStudentScheduler(ctx context.Context, s *Student, doorSerialId string, sche *Scheduler) (*Student, error) {
+// 	// Delete scheduler for door
+// 	var door = &Doorlock{}
+// 	doorResult := ss.db.Where("door_serial_id = ?", doorSerialId).First(door)
+// 	if err := doorResult.Error; err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	if err := ss.db.Model(door).Association("Schedulers").Delete(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// 	if err := ss.db.Model(door).Association("Schedulers").Delete(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	// Delete scheduler for student
-	if err := ss.db.Model(&s).Association("Schedulers").Delete(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
-	return s, nil
-}
+// 	// Delete scheduler for student
+// 	if err := ss.db.Model(&s).Association("Schedulers").Delete(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
+// 	return s, nil
+// }

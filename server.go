@@ -47,35 +47,35 @@ func setupRouter(
 
 		// Student routes
 		v1R.GET("/students", sHdlr.FindAllStudent)
-		v1R.GET("/student/:id", sHdlr.FindStudentByID)
+		v1R.GET("/student/:mssv", sHdlr.FindStudentByMSSV)
 		v1R.POST("/student", sHdlr.CreateStudent)
 		v1R.PATCH("/student", sHdlr.UpdateStudent)
 		v1R.DELETE("/student", sHdlr.DeleteStudent)
-		v1R.POST("/student/:id/scheduler", sHdlr.AppendStudentScheduler)
-		v1R.PATCH("/student/:id/scheduler", sHdlr.UpdateStudentScheduler)
-		v1R.DELETE("/student/:id/scheduler", sHdlr.DeleteStudentScheduler)
+		v1R.POST("/student/:mssv/scheduler", sHdlr.AppendStudentScheduler)
+		// v1R.PATCH("/student/:id/scheduler", sHdlr.UpdateStudentScheduler)
+		// v1R.DELETE("/student/:id/scheduler", sHdlr.DeleteStudentScheduler)
 
 		// Employee routes
 		v1R.GET("/employees", eHdlr.FindAllEmployee)
-		v1R.GET("/employee/:id", eHdlr.FindEmployeeByID)
+		v1R.GET("/employee/:msnv", eHdlr.FindEmployeeByMSNV)
 		v1R.POST("/employee", eHdlr.CreateEmployee)
 		v1R.PATCH("/employee", eHdlr.UpdateEmployee)
 		v1R.PATCH("/employee/hp", eHdlr.UpdateHPEmployee)
 		v1R.DELETE("/employee", eHdlr.DeleteEmployee)
 		v1R.DELETE("/employee/hp/:msnv", eHdlr.DeleteHPEmployee)
-		v1R.POST("/employee/:id/scheduler", eHdlr.AppendEmployeeScheduler)
-		v1R.PATCH("/employee/:id/scheduler", eHdlr.UpdateEmployeeScheduler)
-		v1R.DELETE("/employee/:id/scheduler", eHdlr.DeleteEmployeeScheduler)
+		v1R.POST("/employee/:msnv/scheduler", eHdlr.AppendEmployeeScheduler)
+		// v1R.PATCH("/employee/:msnv/scheduler", eHdlr.UpdateEmployeeScheduler)
+		// v1R.DELETE("/employee/:msnv/scheduler", eHdlr.DeleteEmployeeScheduler)
 
 		// Customer routes
 		v1R.GET("/customers", cusHdlr.FindAllCustomer)
-		v1R.GET("/customer/:id", cusHdlr.FindCustomerByID)
+		v1R.GET("/customer/:cccd", cusHdlr.FindCustomerByCCCD)
 		v1R.POST("/customer", cusHdlr.CreateCustomer)
 		v1R.PATCH("/customer", cusHdlr.UpdateCustomer)
 		v1R.DELETE("/customer", cusHdlr.DeleteCustomer)
-		v1R.POST("/customer/:id/scheduler", cusHdlr.AppendCustomerScheduler)
-		v1R.PATCH("/customer/:id/scheduler", cusHdlr.UpdateCustomerScheduler)
-		v1R.DELETE("/customer/:id/scheduler", cusHdlr.DeleteCustomerScheduler)
+		v1R.POST("/customer/:cccd/scheduler", cusHdlr.AppendCustomerScheduler)
+		// v1R.PATCH("/customer/:id/scheduler", cusHdlr.UpdateCustomerScheduler)
+		// v1R.DELETE("/customer/:id/scheduler", cusHdlr.DeleteCustomerScheduler)
 
 		// Scheduler routes
 		v1R.GET("/schedulers", scheHdlr.FindAllScheduler)

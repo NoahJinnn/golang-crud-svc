@@ -51,23 +51,40 @@ func ServerCreateRegisterPayload(usu models.UserSchedulerUpsert, rfidPass string
 	endDmySlice := getDayMonthYearSlice(sche.EndDate)
 	end := time.Date(endDmySlice[2], time.Month(endDmySlice[1]), endDmySlice[0], 23, 59, 59, 0, loc).Unix()
 
-	msg := fmt.Sprintf(`{"register_id":"%d","doorlock_id":"%s", "user_id":"%s", "rfid_pw":"%s","keypad_pw":"%s",
-	"start_date":"%d","end_date":"%d","week_day":"%d","start_class":"%d","end_class":"%d"}`,
-		sche.ID, usu.DoorlockID, userId, rfidPass, keypadPass,
+	msg := fmt.Sprintf(`{"register_id":"%d",
+	"user_id":"%s",
+	"doorlock_id":"%s",
+	"rfid_pw":"%s",
+	"keypad_pw":"%s",
+	"start_date":"%d",
+	"end_date":"%d",
+	"week_day":"%d",
+	"start_class":"%d",
+	"end_class":"%d"}`,
+		sche.ID, userId, usu.DoorlockID, rfidPass, keypadPass,
 		start, end, sche.WeekDay, sche.StartClassTime, sche.EndClassTime)
 
 	return PayloadWithGatewayId(usu.GatewayID, msg)
 }
 
-func ServerUpdateRegisterPayload(gwId string, sche *models.Scheduler) string {
+func ServerUpdateRegisterPayload(gwId string, uSche *models.UpdateScheduler) string {
+	sche := uSche.Scheduler
 	loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
 	startDmySlice := getDayMonthYearSlice(sche.StartDate)
 	start := time.Date(startDmySlice[2], time.Month(startDmySlice[1]), startDmySlice[0], 0, 0, 0, 0, loc).Unix()
 	endDmySlice := getDayMonthYearSlice(sche.EndDate)
 
 	end := time.Date(endDmySlice[2], time.Month(endDmySlice[1]), endDmySlice[0], 23, 59, 59, 0, loc).Unix()
-	msg := fmt.Sprintf(`{"register_id":"%d","start_date":"%d","end_date":"%d","week_day":"%d","start_class":"%d","end_class":"%d"}`,
-		sche.ID, start, end, sche.WeekDay, sche.StartClassTime, sche.EndClassTime)
+	msg := fmt.Sprintf(`{"register_id":"%d",
+	"user_id":"%s",
+	"doorlock_id":"%s",
+	"start_date":"%d",
+	"end_date":"%d",
+	"week_day":"%d",
+	"start_class":"%d",
+	"end_class":"%d"}`,
+		sche.ID, uSche.UserID, uSche.DoorSerialID,
+		start, end, sche.WeekDay, sche.StartClassTime, sche.EndClassTime)
 	return PayloadWithGatewayId(gwId, msg)
 }
 

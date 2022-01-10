@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
@@ -55,7 +56,7 @@ func (gs *GatewaySvc) FindGatewayByMacID(ctx context.Context, id string) (gw *Ga
 	}
 
 	if cnt <= 0 {
-		return nil, nil
+		return nil, fmt.Errorf("find no records")
 	}
 
 	return gw, nil

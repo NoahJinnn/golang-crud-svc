@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"gorm.io/gorm"
@@ -9,11 +10,11 @@ import (
 
 type Customer struct {
 	GormModel
-	CCCD  string `gorm:"type:varchar(50); unique; not null;" json:"cccd"  binding:"required"`
+	CCCD  string `gorm:"type:varchar(256); unique; not null;" json:"cccd"  binding:"required"`
 	Name  string `json:"name"`
 	Phone string `gorm:"type:varchar(50)" json:"phone"`
 	UserPass
-	Schedulers []Scheduler `gorm:"many2many:customer_schedulers;"`
+	Schedulers []Scheduler `gorm:"foreignKey:CustomerID;references:CCCD;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
 type CustomerSvc struct {
@@ -35,12 +36,18 @@ func (cs *CustomerSvc) FindAllCustomer(ctx context.Context) (cList []Customer, e
 	return cList, nil
 }
 
-func (cs *CustomerSvc) FindCustomerByID(ctx context.Context, id string) (c *Customer, err error) {
-	result := cs.db.Preload("Schedulers").First(&c, id)
+func (cs *CustomerSvc) FindCustomerByCCCD(ctx context.Context, cccd string) (c *Customer, err error) {
+	var cnt int64
+	result := cs.db.Preload("Schedulers").Where("mssv = ?", cccd).Find(&c).Count(&cnt)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
 	}
+
+	if cnt <= 0 {
+		return nil, fmt.Errorf("find no records")
+	}
+
 	return c, nil
 }
 
@@ -85,46 +92,46 @@ func (cs *CustomerSvc) AppendCustomerScheduler(ctx context.Context, c *Customer,
 	return c, nil
 }
 
-func (cs *CustomerSvc) UpdateCustomerScheduler(ctx context.Context, c *Customer, doorSerialId string, sche *Scheduler) (*Customer, error) {
-	// Update scheduler for door
-	var door = &Doorlock{}
-	doorResult := cs.db.Where("door_serial_id = ?", doorSerialId).First(door)
-	if err := doorResult.Error; err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// func (cs *CustomerSvc) UpdateCustomerScheduler(ctx context.Context, c *Customer, doorSerialId string, sche *Scheduler) (*Customer, error) {
+// 	// Update scheduler for door
+// 	var door = &Doorlock{}
+// 	doorResult := cs.db.Where("door_serial_id = ?", doorSerialId).First(door)
+// 	if err := doorResult.Error; err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	if err := cs.db.Model(door).Association("Schedulers").Replace(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// 	if err := cs.db.Model(door).Association("Schedulers").Replace(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	// Update scheduler for customer
-	if err := cs.db.Model(&c).Association("Schedulers").Replace(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
-	return c, nil
-}
+// 	// Update scheduler for customer
+// 	if err := cs.db.Model(&c).Association("Schedulers").Replace(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
+// 	return c, nil
+// }
 
-func (cs *CustomerSvc) DeleteCustomerScheduler(ctx context.Context, c *Customer, doorSerialId string, sche *Scheduler) (*Customer, error) {
-	// Delete scheduler for door
-	var door = &Doorlock{}
-	doorResult := cs.db.Where("door_serial_id = ?", doorSerialId).First(door)
-	if err := doorResult.Error; err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// func (cs *CustomerSvc) DeleteCustomerScheduler(ctx context.Context, c *Customer, doorSerialId string, sche *Scheduler) (*Customer, error) {
+// 	// Delete scheduler for door
+// 	var door = &Doorlock{}
+// 	doorResult := cs.db.Where("door_serial_id = ?", doorSerialId).First(door)
+// 	if err := doorResult.Error; err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	if err := cs.db.Model(door).Association("Schedulers").Delete(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
+// 	if err := cs.db.Model(door).Association("Schedulers").Delete(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
 
-	// Delete scheduler for customer
-	if err := cs.db.Model(&c).Association("Schedulers").Delete(sche); err != nil {
-		err = utils.HandleQueryError(err)
-		return nil, err
-	}
-	return c, nil
-}
+// 	// Delete scheduler for customer
+// 	if err := cs.db.Model(&c).Association("Schedulers").Delete(sche); err != nil {
+// 		err = utils.HandleQueryError(err)
+// 		return nil, err
+// 	}
+// 	return c, nil
+// }

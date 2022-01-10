@@ -112,7 +112,7 @@ func (h *SchedulerHandler) CreateScheduler(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/scheduler [patch]
 func (h *SchedulerHandler) UpdateScheduler(c *gin.Context) {
-	s := &models.Scheduler{}
+	s := &models.UpdateScheduler{}
 	err := c.ShouldBind(s)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -133,7 +133,7 @@ func (h *SchedulerHandler) UpdateScheduler(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.UpdateScheduler(c.Request.Context(), s)
+	isSuccess, err := h.svc.UpdateScheduler(c.Request.Context(), &s.Scheduler)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

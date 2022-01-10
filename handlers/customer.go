@@ -43,19 +43,19 @@ func (h *CustomerHandler) FindAllCustomer(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, sList)
 }
 
-// Find customer info by id
-// @Summary Find Customer By ID
+// Find customer info by cccd
+// @Summary Find Customer By CCCD
 // @Schemes
-// @Description find customer info by customer id
+// @Description find customer info by customer cccd
 // @Produce json
-// @Param        id	path	string	true	"Customer ID"
+// @Param        cccd	path	string	true	"Customer CCCD"
 // @Success 200 {object} models.Customer
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /v1/customer/{id} [get]
-func (h *CustomerHandler) FindCustomerByID(c *gin.Context) {
-	id := c.Param("id")
+// @Router /v1/customer/{cccd} [get]
+func (h *CustomerHandler) FindCustomerByCCCD(c *gin.Context) {
+	cccd := c.Param("cccd")
 
-	cus, err := h.svc.FindCustomerByID(c, id)
+	cus, err := h.svc.FindCustomerByCCCD(c, cccd)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -183,7 +183,7 @@ func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 		return
 	}
 
-	cus, err := h.svc.FindCustomerByID(c, cId)
+	cus, err := h.svc.FindCustomerByCCCD(c, cId)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -216,94 +216,94 @@ func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, true)
 }
 
-func (h *CustomerHandler) UpdateCustomerScheduler(c *gin.Context) {
-	usu := &models.UserSchedulerUpsert{}
-	cId := c.Param("id")
-	err := c.ShouldBind(usu)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Invalid req body",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// func (h *CustomerHandler) UpdateCustomerScheduler(c *gin.Context) {
+// 	usu := &models.UserSchedulerUpsert{}
+// 	cId := c.Param("id")
+// 	err := c.ShouldBind(usu)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Invalid req body",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	cus, err := h.svc.FindCustomerByID(c, cId)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Get customer failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	cus, err := h.svc.FindCustomerByCCCD(c, cId)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Get customer failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	// t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
-	// if err := mqttSvc.HandleMqttErr(&t); err != nil {
-	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-	// 		StatusCode: http.StatusBadRequest,
-	// 		Msg:        "Update scheduler mqtt failed",
-	// 		ErrorMsg:   err.Error(),
-	// 	})
-	// 	return
-	// }
+// 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
+// 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Update scheduler mqtt failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	_, err = h.svc.UpdateCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update customer failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	_, err = h.svc.UpdateCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Update customer failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	utils.ResponseJson(c, http.StatusOK, true)
-}
+// 	utils.ResponseJson(c, http.StatusOK, true)
+// }
 
-func (h *CustomerHandler) DeleteCustomerScheduler(c *gin.Context) {
-	usu := &models.UserSchedulerUpsert{}
-	cId := c.Param("id")
-	err := c.ShouldBind(usu)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Invalid req body",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// func (h *CustomerHandler) DeleteCustomerScheduler(c *gin.Context) {
+// 	usu := &models.UserSchedulerUpsert{}
+// 	cId := c.Param("id")
+// 	err := c.ShouldBind(usu)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Invalid req body",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	cus, err := h.svc.FindCustomerByID(c, cId)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Get customer failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	cus, err := h.svc.FindCustomerByCCCD(c, cId)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Get customer failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	// t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, cus.CCCD))
-	// if err := mqttSvc.HandleMqttErr(&t); err != nil {
-	// 	utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-	// 		StatusCode: http.StatusBadRequest,
-	// 		Msg:        "Delete scheduler mqtt failed",
-	// 		ErrorMsg:   err.Error(),
-	// 	})
-	// 	return
-	// }
+// 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerDeleteRegisterPayload(*usu, cus.CCCD))
+// 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Delete scheduler mqtt failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	_, err = h.svc.DeleteCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update customer failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
+// 	_, err = h.svc.DeleteCustomerScheduler(c.Request.Context(), cus, usu.DoorlockID, &usu.Scheduler)
+// 	if err != nil {
+// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+// 			StatusCode: http.StatusBadRequest,
+// 			Msg:        "Update customer failed",
+// 			ErrorMsg:   err.Error(),
+// 		})
+// 		return
+// 	}
 
-	utils.ResponseJson(c, http.StatusOK, true)
-}
+// 	utils.ResponseJson(c, http.StatusOK, true)
+// }

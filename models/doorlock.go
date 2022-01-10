@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
@@ -10,13 +11,13 @@ import (
 
 type Doorlock struct {
 	GormModel
-	DoorSerialID    string      `gorm:"unique;not null" json:"doorSerialId"`
+	DoorSerialID    string      `gorm:"type:varchar(256);unique;not null" json:"doorSerialId"`
 	Location        string      `json:"location"`
 	State           string      `gorm:"not null" json:"state"`
 	Description     string      `json:"description"`
 	LastConnectTime time.Time   `json:"lastConnectTime"`
 	GatewayID       string      `gorm:"type:varchar(256);" json:"gatewayId"`
-	Schedulers      []Scheduler `gorm:"many2many:door_schedulers;"`
+	Schedulers      []Scheduler `gorm:"foreignKey:DoorSerialID;references:DoorSerialID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
 type DoorlockCmd struct {
@@ -74,7 +75,7 @@ func (dls *DoorlockSvc) FindDoorlockBySerialID(ctx context.Context, serialiId st
 	}
 
 	if cnt <= 0 {
-		return nil, nil
+		return nil, fmt.Errorf("find no records")
 	}
 
 	return dl, nil
