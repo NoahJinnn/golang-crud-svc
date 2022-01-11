@@ -38,7 +38,7 @@ func (cs *CustomerSvc) FindAllCustomer(ctx context.Context) (cList []Customer, e
 
 func (cs *CustomerSvc) FindCustomerByCCCD(ctx context.Context, cccd string) (c *Customer, err error) {
 	var cnt int64
-	result := cs.db.Preload("Schedulers").Where("mssv = ?", cccd).Find(&c).Count(&cnt)
+	result := cs.db.Preload("Schedulers").Where("cccd = ?", cccd).Find(&c).Count(&cnt)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err
@@ -60,7 +60,7 @@ func (cs *CustomerSvc) CreateCustomer(ctx context.Context, c *Customer) (*Custom
 }
 
 func (cs *CustomerSvc) UpdateCustomer(ctx context.Context, c *Customer) (bool, error) {
-	result := cs.db.Model(&c).Where("id = ?", c.ID).Updates(c)
+	result := cs.db.Model(&c).Where("id = ? AND cccd = ?", c.ID, c.CCCD).Updates(c)
 	return utils.ReturnBoolStateFromResult(result)
 }
 

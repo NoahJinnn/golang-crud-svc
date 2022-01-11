@@ -21,14 +21,14 @@ func ServerCreateDoorlockPayload(doorlock *models.Doorlock) string {
 	return PayloadWithGatewayId(doorlock.GatewayID, msg)
 }
 
-func ServerDeleteDoorlockPayload(doorlock *models.DoorlockDelete) string {
-	msg := fmt.Sprintf(`{"doorlock_id":"%s"}`, doorlock.DoorSerialID)
-	return PayloadWithGatewayId(doorlock.GatewayID, msg)
-}
-
 func ServerUpdateDoorlockPayload(doorlock *models.Doorlock) string {
 	msg := fmt.Sprintf(`{"doorlock_id":"%s","description":"%s","location":"%s", "state":"%s"}`,
 		doorlock.DoorSerialID, doorlock.Description, doorlock.Location, doorlock.State)
+	return PayloadWithGatewayId(doorlock.GatewayID, msg)
+}
+
+func ServerDeleteDoorlockPayload(doorlock *models.DoorlockDelete) string {
+	msg := fmt.Sprintf(`{"doorlock_id":"%s"}`, doorlock.DoorSerialID)
 	return PayloadWithGatewayId(doorlock.GatewayID, msg)
 }
 
@@ -111,16 +111,9 @@ func ServerBootuptHPEmployeePayload(gwId string, emps []models.Employee) string 
 	return PayloadWithGatewayId(gwId, string(bootupEmpsJson))
 }
 
-func ServerUpsertHPEmployeePayload(gwId string, emp *models.Employee) string {
+func ServerUpdateUserPayload(gwId string, userId string, rfidPw string, keypadPw string) string {
 	msg := fmt.Sprintf(`{"user_id":"%s","rfid_pw":"%s", "keypad_pw":"%s"}`,
-		emp.MSNV, emp.RfidPass, emp.KeypadPass)
-	return PayloadWithGatewayId(gwId, msg)
-}
-
-func ServerUpdateUserPayload(gwId string, userId string, rfidPw string, keypadPw string, schedulerIds []uint) string {
-	schedulerIdsJson, _ := json.Marshal(schedulerIds)
-	msg := fmt.Sprintf(`{"user_id":"%s","rfid_pw":"%s", "keypad_pw":"%s","register_id":"%s"}`,
-		userId, rfidPw, keypadPw, schedulerIdsJson)
+		userId, rfidPw, keypadPw)
 	return PayloadWithGatewayId(gwId, msg)
 }
 

@@ -123,16 +123,6 @@ func (h *SchedulerHandler) UpdateScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_U, 1, false, mqttSvc.ServerUpdateRegisterPayload("0", s))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update scheduler mqtt failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
-
 	isSuccess, err := h.svc.UpdateScheduler(c.Request.Context(), &s.Scheduler)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -142,6 +132,18 @@ func (h *SchedulerHandler) UpdateScheduler(c *gin.Context) {
 		})
 		return
 	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_U, 1, false,
+		mqttSvc.ServerUpdateRegisterPayload("0", s))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update scheduler mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
@@ -167,7 +169,8 @@ func (h *SchedulerHandler) DeleteScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_D, 1, false, mqttSvc.ServerDeleteRegisterPayload("0", dId.ID))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_D, 1, false,
+		mqttSvc.ServerDeleteRegisterPayload("0", dId.ID))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

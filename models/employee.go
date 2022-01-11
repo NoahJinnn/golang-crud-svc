@@ -77,12 +77,14 @@ func (es *EmployeeSvc) CreateEmployee(ctx context.Context, e *Employee) (*Employ
 }
 
 func (es *EmployeeSvc) UpdateEmployee(ctx context.Context, e *Employee) (bool, error) {
-	result := es.db.Model(&e).Where("id = ?", e.ID).Updates(e)
-	return utils.ReturnBoolStateFromResult(result)
-}
-
-func (es *EmployeeSvc) UpdateHPEmployee(ctx context.Context, e *Employee) (bool, error) {
-	result := es.db.Model(&e).Where("id = ? AND highest_priority = ?", e.ID, true).Updates(e)
+	result := es.db.Model(&e).Where("id = ? AND msnv = ?", e.ID, e.MSNV).Updates(e)
+	_, err := utils.ReturnBoolStateFromResult(result)
+	if err != nil {
+		return false, err
+	}
+	result = es.db.Model(&e).Where("id = ? AND msnv = ?", e.ID, e.MSNV).Updates(map[string]interface{}{
+		"highest_priority": e.HighestPriority,
+	})
 	return utils.ReturnBoolStateFromResult(result)
 }
 

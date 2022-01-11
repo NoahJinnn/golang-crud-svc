@@ -27,7 +27,7 @@ type DoorlockCmd struct {
 }
 
 type DoorlockDelete struct {
-	DoorSerialID string `json:"doorSerialId"`
+	DoorSerialID string `json:"doorSerialId" binding:"required"`
 	GatewayID    string `json:"gatewayId"`
 }
 

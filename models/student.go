@@ -62,7 +62,7 @@ func (ss *StudentSvc) CreateStudent(ctx context.Context, s *Student) (*Student, 
 }
 
 func (ss *StudentSvc) UpdateStudent(ctx context.Context, s *Student) (bool, error) {
-	result := ss.db.Model(&s).Where("id = ?", s.ID).Updates(s)
+	result := ss.db.Model(&s).Where("id = ? AND mssv = ?", s.ID, s.MSSV).Updates(s)
 	return utils.ReturnBoolStateFromResult(result)
 }
 

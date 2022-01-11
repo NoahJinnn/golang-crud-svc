@@ -34,7 +34,7 @@ type Scheduler struct {
 type UpdateScheduler struct {
 	UserID       string `json:"userId" binding:"required"`
 	DoorSerialID string `json:"doorSerialId" binding:"required"`
-	Scheduler    `binding:"required"`
+	Scheduler    `json:"scheduler" binding:"required"`
 }
 
 type SchedulerSvc struct {

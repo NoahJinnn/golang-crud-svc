@@ -10,10 +10,10 @@ const (
 	TOPIC_GW_BOOTUP   string = "gateway/bootup"
 	TOPIC_GW_SHUTDOWN string = "gateway/shutdown"
 
-	TOPIC_SV_DOORLOCK_CMD string = "server/doorlock/command"
 	TOPIC_SV_DOORLOCK_C   string = "server/doorlock/create"
 	TOPIC_SV_DOORLOCK_U   string = "server/doorlock/update"
 	TOPIC_SV_DOORLOCK_D   string = "server/doorlock/delete"
+	TOPIC_SV_DOORLOCK_CMD string = "server/doorlock/command"
 	TOPIC_SV_GATEWAY_U    string = "server/gateway/update"
 
 	TOPIC_SV_SCHEDULER_C string = "server/register/create"
