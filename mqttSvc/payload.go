@@ -10,10 +10,10 @@ import (
 	"github.com/ecoprohcm/DMS_BackendServer/models"
 )
 
-type BootupHPEmployee struct {
-	userId     string `json:"user_id"`
-	rfidPass   string `json:"rfid_pw"`
-	keypadPass string `json:"keypad_pw"`
+type UserIDPassword struct {
+	UserId     string `json:"user_id"`
+	RfidPass   string `json:"rfid_pw"`
+	KeypadPass string `json:"keypad_pw"`
 }
 
 func ServerCreateDoorlockPayload(doorlock *models.Doorlock) string {
@@ -42,8 +42,12 @@ func ServerUpdateGatewayPayload(gw *models.Gateway) string {
 		gw.ID, gw.AreaID, gw.Name, gw.State)
 }
 
-func ServerCreateRegisterPayload(usu models.UserSchedulerUpsert, rfidPass string, keypadPass string, userId string) string {
-	sche := usu.Scheduler
+func ServerCreateRegisterPayload(
+	gwId string,
+	doorId string,
+	sche *models.Scheduler,
+	uP *UserIDPassword,
+) string {
 
 	loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
 	startDmySlice := getDayMonthYearSlice(sche.StartDate)
@@ -61,10 +65,10 @@ func ServerCreateRegisterPayload(usu models.UserSchedulerUpsert, rfidPass string
 	"week_day":"%d",
 	"start_class":"%d",
 	"end_class":"%d"}`,
-		sche.ID, userId, usu.DoorlockID, rfidPass, keypadPass,
+		sche.ID, uP.UserId, doorId, uP.RfidPass, uP.KeypadPass,
 		start, end, sche.WeekDay, sche.StartClassTime, sche.EndClassTime)
 
-	return PayloadWithGatewayId(usu.GatewayID, msg)
+	return PayloadWithGatewayId(gwId, msg)
 }
 
 func ServerUpdateRegisterPayload(gwId string, uSche *models.UpdateScheduler) string {
@@ -94,12 +98,12 @@ func ServerDeleteRegisterPayload(gwId string, registerId uint) string {
 }
 
 func ServerBootuptHPEmployeePayload(gwId string, emps []models.Employee) string {
-	bootupEmps := []BootupHPEmployee{}
+	bootupEmps := []UserIDPassword{}
 	for _, emp := range emps {
-		buEmp := BootupHPEmployee{
-			userId:     emp.MSNV,
-			rfidPass:   emp.RfidPass,
-			keypadPass: emp.KeypadPass,
+		buEmp := UserIDPassword{
+			UserId:     emp.MSNV,
+			RfidPass:   emp.RfidPass,
+			KeypadPass: emp.KeypadPass,
 		}
 		bootupEmps = append(bootupEmps, buEmp)
 	}

@@ -69,10 +69,10 @@ func main() {
 	areaHdlr := handlers.NewAreaHandler(areaSvc)
 	dlHdlr := handlers.NewDoorlockHandler(dlSvc, mqttClient)
 	glHdlr := handlers.NewGatewayLogHandler(glSvc)
-	sHdlr := handlers.NewStudentHandler(sSvc, mqttClient)
-	eHdlr := handlers.NewEmployeeHandler(eSvc, mqttClient)
+	sHdlr := handlers.NewStudentHandler(sSvc, scheSvc, mqttClient)
+	eHdlr := handlers.NewEmployeeHandler(eSvc, scheSvc, mqttClient)
 	scheHdlr := handlers.NewSchedulerHandler(scheSvc, mqttClient)
-	cusHdlr := handlers.NewCustomerHandler(cusSvc, mqttClient)
+	cusHdlr := handlers.NewCustomerHandler(cusSvc, scheSvc, mqttClient)
 
 	// HTTP Serve
 	r := setupRouter(gwHdlr, areaHdlr, dlHdlr, glHdlr, sHdlr, eHdlr, cusHdlr, scheHdlr)

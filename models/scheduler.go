@@ -9,26 +9,26 @@ import (
 
 type Scheduler struct {
 	GormModel
-	Base           string `gorm:"not null;" json:"base"`
-	RoomRow        string `gorm:"not null;" json:"roomRow"`
-	RoomID         string `gorm:" not null;" json:"roomId"`
-	RoomName       string `gorm:" not null;" json:"roomName"`
-	StartDate      string `gorm:"type:varchar(50) not null;" json:"startDate"`
-	EndDate        string `gorm:"type:varchar(50) not null;" json:"endDate"`
-	ClassID        string `gorm:" not null;" json:"classId"`
-	ClassName      string `gorm:" not null;" json:"className"`
-	LecturerID     string `gorm:" not null;" json:"lecturerId"`
-	LecturerName   string `gorm:" not null;" json:"lecturerName"`
-	Capacity       uint   `json:"capacity"`
-	WeekDay        uint   `json:"weekDay"`
-	StartClassTime uint   `json:"startClassTime"`
-	EndClassTime   uint   `json:"endClassTime"`
-	Amount         uint   `json:"amount"`
-	Status         string `json:"status"`
-	DoorSerialID   string `gorm:"type:varchar(256);" json:"doorSerialId"`
-	EmployeeID     string `gorm:"type:varchar(256);" json:"employeeId"`
-	StudentID      string `gorm:"type:varchar(256);" json:"studentId"`
-	CustomerID     string `gorm:"type:varchar(256);" json:"customerId"`
+	Base           string  `gorm:"not null;" json:"base"`
+	RoomRow        string  `gorm:"not null;" json:"roomRow"`
+	RoomID         string  `gorm:" not null;" json:"roomId"`
+	RoomName       string  `gorm:" not null;" json:"roomName"`
+	StartDate      string  `gorm:"type:varchar(50) not null;" json:"startDate"`
+	EndDate        string  `gorm:"type:varchar(50) not null;" json:"endDate"`
+	ClassID        string  `gorm:" not null;" json:"classId"`
+	ClassName      string  `gorm:" not null;" json:"className"`
+	LecturerID     string  `gorm:" not null;" json:"lecturerId"`
+	LecturerName   string  `gorm:" not null;" json:"lecturerName"`
+	Capacity       uint    `json:"capacity"`
+	WeekDay        uint    `json:"weekDay"`
+	StartClassTime uint    `json:"startClassTime"`
+	EndClassTime   uint    `json:"endClassTime"`
+	Amount         uint    `json:"amount"`
+	Status         string  `json:"status"`
+	DoorSerialID   *string `gorm:"type:varchar(256);" json:"doorSerialId"`
+	EmployeeID     *string `gorm:"type:varchar(256);" json:"employeeId"`
+	StudentID      *string `gorm:"type:varchar(256);" json:"studentId"`
+	CustomerID     *string `gorm:"type:varchar(256);" json:"customerId"`
 }
 
 type UpdateScheduler struct {

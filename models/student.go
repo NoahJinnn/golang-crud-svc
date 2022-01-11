@@ -81,6 +81,13 @@ func (ss *StudentSvc) AppendStudentScheduler(ctx context.Context, s *Student, do
 		return nil, err
 	}
 
+	sche.StudentID = &s.MSSV
+	sche.DoorSerialID = &doorSerialId
+	if err := ss.db.Create(&sche).Error; err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
 	if err := ss.db.Model(door).Association("Schedulers").Append(sche); err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err

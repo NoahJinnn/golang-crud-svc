@@ -11,14 +11,16 @@ import (
 )
 
 type EmployeeHandler struct {
-	svc  *models.EmployeeSvc
-	mqtt mqtt.Client
+	svc     *models.EmployeeSvc
+	scheSvc *models.SchedulerSvc
+	mqtt    mqtt.Client
 }
 
-func NewEmployeeHandler(svc *models.EmployeeSvc, mqtt mqtt.Client) *EmployeeHandler {
+func NewEmployeeHandler(svc *models.EmployeeSvc, scheSvc *models.SchedulerSvc, mqtt mqtt.Client) *EmployeeHandler {
 	return &EmployeeHandler{
-		svc:  svc,
-		mqtt: mqtt,
+		svc:     svc,
+		scheSvc: scheSvc,
+		mqtt:    mqtt,
 	}
 }
 
@@ -277,13 +279,35 @@ func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
+			Msg:        "Get employee failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, emp.RfidPass, emp.KeypadPass, emp.MSNV))
+	sche := &usu.Scheduler
+	sche.EmployeeID = &emp.MSNV
+	sche.DoorSerialID = &usu.DoorlockID
+	_, err = h.scheSvc.CreateScheduler(c.Request.Context(), sche)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Create scheduler failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(
+		usu.GatewayID,
+		usu.DoorlockID,
+		sche,
+		&mqttSvc.UserIDPassword{
+			UserId:     emp.MSNV,
+			RfidPass:   emp.RfidPass,
+			KeypadPass: emp.KeypadPass,
+		}))
+
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -297,7 +321,7 @@ func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
+			Msg:        "Update employee failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -323,7 +347,7 @@ func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 // 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Get student failed",
+// 			Msg:        "Get employee failed",
 // 			ErrorMsg:   err.Error(),
 // 		})
 // 		return
@@ -333,7 +357,7 @@ func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 // 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Update student failed",
+// 			Msg:        "Update employee failed",
 // 			ErrorMsg:   err.Error(),
 // 		})
 // 		return
@@ -375,7 +399,7 @@ func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 // 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Get student failed",
+// 			Msg:        "Get employee failed",
 // 			ErrorMsg:   err.Error(),
 // 		})
 // 		return
@@ -385,7 +409,7 @@ func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 // 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Update student failed",
+// 			Msg:        "Update employee failed",
 // 			ErrorMsg:   err.Error(),
 // 		})
 // 		return

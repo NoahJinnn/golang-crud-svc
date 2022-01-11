@@ -79,6 +79,13 @@ func (cs *CustomerSvc) AppendCustomerScheduler(ctx context.Context, c *Customer,
 		return nil, err
 	}
 
+	sche.StudentID = &c.CCCD
+	sche.DoorSerialID = &doorSerialId
+	if err := cs.db.Create(&sche).Error; err != nil {
+		err = utils.HandleQueryError(err)
+		return nil, err
+	}
+
 	if err := cs.db.Model(door).Association("Schedulers").Append(sche); err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err

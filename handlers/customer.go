@@ -11,14 +11,16 @@ import (
 )
 
 type CustomerHandler struct {
-	svc  *models.CustomerSvc
-	mqtt mqtt.Client
+	svc     *models.CustomerSvc
+	scheSvc *models.SchedulerSvc
+	mqtt    mqtt.Client
 }
 
-func NewCustomerHandler(svc *models.CustomerSvc, mqtt mqtt.Client) *CustomerHandler {
+func NewCustomerHandler(svc *models.CustomerSvc, scheSvc *models.SchedulerSvc, mqtt mqtt.Client) *CustomerHandler {
 	return &CustomerHandler{
-		svc:  svc,
-		mqtt: mqtt,
+		svc:     svc,
+		scheSvc: scheSvc,
+		mqtt:    mqtt,
 	}
 }
 
@@ -193,7 +195,30 @@ func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(*usu, cus.RfidPass, cus.KeypadPass, cus.CCCD))
+	sche := usu.Scheduler
+	sche.EmployeeID = &cus.CCCD
+	sche.DoorSerialID = &usu.DoorlockID
+	_, err = h.scheSvc.CreateScheduler(c, &sche)
+
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Create scheduler failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(
+		usu.GatewayID,
+		usu.DoorlockID,
+		&sche,
+		&mqttSvc.UserIDPassword{
+			UserId:     cus.CCCD,
+			RfidPass:   cus.RfidPass,
+			KeypadPass: cus.KeypadPass,
+		},
+	))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
