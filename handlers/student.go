@@ -106,7 +106,7 @@ func (h *StudentHandler) CreateStudent(c *gin.Context) {
 // Update student
 // @Summary Update Student By ID
 // @Schemes
-// @Description Update student, must have "mssv" field
+// @Description Update student, must have "id" and "mssv" field
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.SwagUpdateStudent	true	"Fields need to update a student"
@@ -134,22 +134,34 @@ func (h *StudentHandler) UpdateStudent(c *gin.Context) {
 		})
 		return
 	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_U, 1, false,
+		mqttSvc.ServerUpdateUserPayload("0", s.MSSV, s.RfidPass, s.KeypadPass))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update student mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
 // Delete student
-// @Summary Delete Student By ID
+// @Summary Delete Student By MSSV
 // @Schemes
 // @Description Delete student using "mssv" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	object{id=int}	true	"Student ID"
+// @Param	data	body	models.DeleteStudent	true	"Student MSSV"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/student [delete]
 func (h *StudentHandler) DeleteStudent(c *gin.Context) {
-	dId := &models.DeleteID{}
-	err := c.ShouldBind(dId)
+	ds := &models.DeleteStudent{}
+	err := c.ShouldBind(ds)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -159,7 +171,7 @@ func (h *StudentHandler) DeleteStudent(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteStudent(c.Request.Context(), dId.ID)
+	isSuccess, err := h.svc.DeleteStudent(c.Request.Context(), ds.MSSV)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -168,13 +180,25 @@ func (h *StudentHandler) DeleteStudent(c *gin.Context) {
 		})
 		return
 	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_D, 1, false,
+		mqttSvc.ServerDeleteUserPayload("0", ds.MSSV))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Delete student mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 
 }
 
 func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
-	sId := c.Param("mssv")
+	mssv := c.Param("mssv")
 	err := c.ShouldBind(usu)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -185,7 +209,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	s, err := h.svc.FindStudentByMSSV(c, sId)
+	s, err := h.svc.FindStudentByMSSV(c, mssv)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -195,10 +219,10 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 		return
 	}
 
-	sche := usu.Scheduler
+	sche := &usu.Scheduler
 	sche.EmployeeID = &s.MSSV
 	sche.DoorSerialID = &usu.DoorlockID
-	_, err = h.scheSvc.CreateScheduler(c, &sche)
+	_, err = h.scheSvc.CreateScheduler(c, sche)
 
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -212,7 +236,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(
 		usu.GatewayID,
 		usu.DoorlockID,
-		&sche,
+		sche,
 		&mqttSvc.UserIDPassword{
 			UserId:     s.MSSV,
 			RfidPass:   s.RfidPass,
@@ -243,7 +267,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 
 // func (h *StudentHandler) UpdateStudentScheduler(c *gin.Context) {
 // 	usu := &models.UserSchedulerUpsert{}
-// 	sId := c.Param("mssv")
+// 	mssv := c.Param("mssv")
 // 	err := c.ShouldBind(usu)
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -254,7 +278,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 // 		return
 // 	}
 
-// 	s, err := h.svc.FindStudentByMSSV(c, sId)
+// 	s, err := h.svc.FindStudentByMSSV(c, mssv)
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 // 			StatusCode: http.StatusBadRequest,
@@ -289,7 +313,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 
 // func (h *StudentHandler) DeleteStudentScheduler(c *gin.Context) {
 // 	usu := &models.UserSchedulerUpsert{}
-// 	sId := c.Param("mssv")
+// 	mssv := c.Param("mssv")
 // 	err := c.ShouldBind(usu)
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -300,7 +324,7 @@ func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 // 		return
 // 	}
 
-// 	s, err := h.svc.FindStudentByMSSV(c, sId)
+// 	s, err := h.svc.FindStudentByMSSV(c, mssv)
 // 	if err != nil {
 // 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 // 			StatusCode: http.StatusBadRequest,

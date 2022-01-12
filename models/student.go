@@ -19,6 +19,10 @@ type Student struct {
 	Schedulers []Scheduler `gorm:"foreignKey:StudentID;references:MSSV;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
+type DeleteStudent struct {
+	MSSV string `json:"mssv" binding:"required"`
+}
+
 type StudentSvc struct {
 	db *gorm.DB
 }
@@ -66,8 +70,8 @@ func (ss *StudentSvc) UpdateStudent(ctx context.Context, s *Student) (bool, erro
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (ss *StudentSvc) DeleteStudent(ctx context.Context, studentId uint) (bool, error) {
-	result := ss.db.Unscoped().Where("id = ?", studentId).Delete(&Student{})
+func (ss *StudentSvc) DeleteStudent(ctx context.Context, mssv string) (bool, error) {
+	result := ss.db.Unscoped().Where("mssv = ?", mssv).Delete(&Student{})
 	return utils.ReturnBoolStateFromResult(result)
 }
 

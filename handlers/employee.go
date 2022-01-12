@@ -91,6 +91,16 @@ func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
 		return
 	}
 
+	_, err = h.svc.CreateEmployee(c.Request.Context(), emp)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Create employee failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	if emp.HighestPriority {
 		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_C, 1, false,
 			mqttSvc.ServerUpdateUserPayload("0", emp.MSNV, emp.RfidPass, emp.KeypadPass))
@@ -104,15 +114,6 @@ func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
 		}
 	}
 
-	_, err = h.svc.CreateEmployee(c.Request.Context(), emp)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Create employee failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
 	utils.ResponseJson(c, http.StatusOK, emp)
 }
 
@@ -127,8 +128,8 @@ func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/employee [patch]
 func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
-	emp := &models.Employee{}
-	err := c.ShouldBind(emp)
+	reqEmp := &models.Employee{}
+	err := c.ShouldBind(reqEmp)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -138,7 +139,18 @@ func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.UpdateEmployee(c.Request.Context(), emp)
+	findEmp, err := h.svc.FindEmployeeByMSNV(c.Request.Context(), reqEmp.MSNV)
+	if err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Get employee failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+	isUpdatingHPEmpl := findEmp.HighestPriority
+
+	isSuccess, err := h.svc.UpdateEmployee(c.Request.Context(), reqEmp)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -148,20 +160,42 @@ func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_U, 1, false,
-		mqttSvc.ServerUpdateUserPayload("0", emp.MSNV, emp.RfidPass, emp.KeypadPass))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update employee mqtt failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
-
-	if emp.HighestPriority {
-		t = h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_U, 1, false,
-			mqttSvc.ServerUpdateUserPayload("0", emp.MSNV, emp.RfidPass, emp.KeypadPass))
+	if !isUpdatingHPEmpl && reqEmp.HighestPriority {
+		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_C, 1, false,
+			mqttSvc.ServerUpdateUserPayload("0", reqEmp.MSNV, reqEmp.RfidPass, reqEmp.KeypadPass))
+		if err := mqttSvc.HandleMqttErr(&t); err != nil {
+			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+				StatusCode: http.StatusBadRequest,
+				Msg:        "Create HP employee mqtt failed",
+				ErrorMsg:   err.Error(),
+			})
+			return
+		}
+	} else if isUpdatingHPEmpl && reqEmp.HighestPriority {
+		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_U, 1, false,
+			mqttSvc.ServerUpdateUserPayload("0", reqEmp.MSNV, reqEmp.RfidPass, reqEmp.KeypadPass))
+		if err := mqttSvc.HandleMqttErr(&t); err != nil {
+			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+				StatusCode: http.StatusBadRequest,
+				Msg:        "Update HP employee mqtt failed",
+				ErrorMsg:   err.Error(),
+			})
+			return
+		}
+	} else if isUpdatingHPEmpl && !reqEmp.HighestPriority {
+		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_D, 1, false,
+			mqttSvc.ServerDeleteUserPayload("0", reqEmp.MSNV))
+		if err := mqttSvc.HandleMqttErr(&t); err != nil {
+			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+				StatusCode: http.StatusBadRequest,
+				Msg:        "Remove HP permission of employee mqtt failed",
+				ErrorMsg:   err.Error(),
+			})
+			return
+		}
+	} else {
+		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_U, 1, false,
+			mqttSvc.ServerUpdateUserPayload("0", reqEmp.MSNV, reqEmp.RfidPass, reqEmp.KeypadPass))
 		if err := mqttSvc.HandleMqttErr(&t); err != nil {
 			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 				StatusCode: http.StatusBadRequest,
@@ -175,62 +209,13 @@ func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
-func (h *EmployeeHandler) UpdateHPEmployee(c *gin.Context) {
-	emp := &models.Employee{}
-	err := c.ShouldBind(emp)
-	if err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Invalid req body",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
-
-	isSuccess, err := h.svc.UpdateEmployee(c.Request.Context(), emp)
-	if err != nil || !isSuccess {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update employee failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
-
-	if emp.HighestPriority {
-		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_U, 1, false,
-			mqttSvc.ServerUpdateUserPayload("0", emp.MSNV, emp.RfidPass, emp.KeypadPass))
-		if err := mqttSvc.HandleMqttErr(&t); err != nil {
-			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-				StatusCode: http.StatusBadRequest,
-				Msg:        "Update HP employee mqtt failed",
-				ErrorMsg:   err.Error(),
-			})
-			return
-		}
-	} else {
-		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_D, 1, false,
-			mqttSvc.ServerDeleteUserPayload("0", emp.MSNV))
-		if err := mqttSvc.HandleMqttErr(&t); err != nil {
-			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-				StatusCode: http.StatusBadRequest,
-				Msg:        "Update HP employee mqtt failed",
-				ErrorMsg:   err.Error(),
-			})
-			return
-		}
-	}
-
-	utils.ResponseJson(c, http.StatusOK, isSuccess)
-}
-
 // Delete employee
-// @Summary Delete Employee By ID
+// @Summary Delete Employee By MSNV
 // @Schemes
 // @Description Delete employee using "msnv" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	object{id=int}	true	"Employee ID"
+// @Param	data	body	models.DeleteEmployee	true	"Employee MSNV"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/employee [delete]
@@ -246,15 +231,16 @@ func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_D, 1, false, mqttSvc.ServerDeleteUserPayload("0", de.MSNV))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+	findEmp, err := h.svc.FindEmployeeByMSNV(c.Request.Context(), de.MSNV)
+	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Delete employee mqtt failed",
+			Msg:        "Get employee failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
 	}
+	isDeletingHPEmpl := findEmp.HighestPriority
 
 	isSuccess, err := h.svc.DeleteEmployee(c.Request.Context(), de.MSNV)
 	if err != nil || !isSuccess {
@@ -265,31 +251,28 @@ func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, isSuccess)
-}
-
-func (h *EmployeeHandler) DeleteHPEmployee(c *gin.Context) {
-	msnv := c.Param("msnv")
-
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_D, 1, false,
-		mqttSvc.ServerDeleteUserPayload("0", msnv))
-	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Delete HP employee mqtt failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
-
-	isSuccess, err := h.svc.DeleteHPEmployee(c.Request.Context(), msnv)
-	if err != nil || !isSuccess {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Delete employee failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
+	if isDeletingHPEmpl {
+		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_HP_D, 1, false,
+			mqttSvc.ServerDeleteUserPayload("0", de.MSNV))
+		if err := mqttSvc.HandleMqttErr(&t); err != nil {
+			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+				StatusCode: http.StatusBadRequest,
+				Msg:        "Delete HP employee mqtt failed",
+				ErrorMsg:   err.Error(),
+			})
+			return
+		}
+	} else {
+		t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_D, 1, false,
+			mqttSvc.ServerDeleteUserPayload("0", de.MSNV))
+		if err := mqttSvc.HandleMqttErr(&t); err != nil {
+			utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+				StatusCode: http.StatusBadRequest,
+				Msg:        "Delete employee mqtt failed",
+				ErrorMsg:   err.Error(),
+			})
+			return
+		}
 	}
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }

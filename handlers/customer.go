@@ -134,6 +134,17 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 		})
 		return
 	}
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_U, 1, false,
+		mqttSvc.ServerUpdateUserPayload("0", cus.CCCD, cus.RfidPass, cus.KeypadPass))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update customer mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
@@ -148,8 +159,8 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/customer [delete]
 func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
-	dId := &models.DeleteID{}
-	err := c.ShouldBind(dId)
+	dcus := &models.DeleteCustomer{}
+	err := c.ShouldBind(dcus)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -159,7 +170,7 @@ func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteCustomer(c.Request.Context(), dId.ID)
+	isSuccess, err := h.svc.DeleteCustomer(c.Request.Context(), dcus.CCCD)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -168,13 +179,24 @@ func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 		})
 		return
 	}
-	utils.ResponseJson(c, http.StatusOK, isSuccess)
 
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_D, 1, false,
+		mqttSvc.ServerDeleteUserPayload("0", dcus.CCCD))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Delete customer mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
+	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
 func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
-	cId := c.Param("id")
+	cccd := c.Param("cccd")
 	err := c.ShouldBind(usu)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -185,7 +207,7 @@ func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 		return
 	}
 
-	cus, err := h.svc.FindCustomerByCCCD(c, cId)
+	cus, err := h.svc.FindCustomerByCCCD(c, cccd)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -195,10 +217,10 @@ func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 		return
 	}
 
-	sche := usu.Scheduler
+	sche := &usu.Scheduler
 	sche.EmployeeID = &cus.CCCD
 	sche.DoorSerialID = &usu.DoorlockID
-	_, err = h.scheSvc.CreateScheduler(c, &sche)
+	_, err = h.scheSvc.CreateScheduler(c, sche)
 
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -212,7 +234,7 @@ func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_SCHEDULER_C, 1, false, mqttSvc.ServerCreateRegisterPayload(
 		usu.GatewayID,
 		usu.DoorlockID,
-		&sche,
+		sche,
 		&mqttSvc.UserIDPassword{
 			UserId:     cus.CCCD,
 			RfidPass:   cus.RfidPass,

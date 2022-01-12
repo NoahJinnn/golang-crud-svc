@@ -123,7 +123,7 @@ func ServerDeleteUserPayload(gwId string, msnv string) string {
 }
 
 func PayloadWithGatewayId(gwId string, msg string) string {
-	return fmt.Sprintf(`{"gateway_id":"%s","message":"%s"}`, gwId, msg)
+	return fmt.Sprintf(`{"gateway_id":"%s","message":%s}`, gwId, msg)
 }
 
 func getDayMonthYearSlice(str string) []int {

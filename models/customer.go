@@ -17,6 +17,10 @@ type Customer struct {
 	Schedulers []Scheduler `gorm:"foreignKey:CustomerID;references:CCCD;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
+type DeleteCustomer struct {
+	CCCD string `json:"cccd" binding:"required"`
+}
+
 type CustomerSvc struct {
 	db *gorm.DB
 }
@@ -64,8 +68,8 @@ func (cs *CustomerSvc) UpdateCustomer(ctx context.Context, c *Customer) (bool, e
 	return utils.ReturnBoolStateFromResult(result)
 }
 
-func (cs *CustomerSvc) DeleteCustomer(ctx context.Context, cId uint) (bool, error) {
-	result := cs.db.Unscoped().Where("id = ?", cId).Delete(&Customer{})
+func (cs *CustomerSvc) DeleteCustomer(ctx context.Context, cccd string) (bool, error) {
+	result := cs.db.Unscoped().Where("cccd = ?", cccd).Delete(&Customer{})
 	return utils.ReturnBoolStateFromResult(result)
 }
 
