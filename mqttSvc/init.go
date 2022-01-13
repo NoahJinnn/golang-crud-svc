@@ -59,10 +59,7 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 		gwId := gjson.Get(payloadStr, "gateway_id")
 		gwMsg := gjson.Get(payloadStr, "message")
 		fmt.Printf("[MQTT-INFO] Gateway %s is shutdown with message: %s", gwId, gwMsg)
-		gw := &models.Gateway{
-			GatewayID: gwId.String(),
-		}
-		gwSvc.DeleteGatewayByMacId(context.Background(), gw)
+		gwSvc.DeleteGateway(context.Background(), gwId.String())
 	})
 
 	if err := HandleMqttErr(&t); err == nil {

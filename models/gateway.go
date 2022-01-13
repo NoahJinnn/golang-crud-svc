@@ -19,6 +19,10 @@ type Gateway struct {
 	Doorlocks       []Doorlock `gorm:"foreignKey:GatewayID;references:GatewayID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
 }
 
+type DeleteGateway struct {
+	GatewayID string `json:"gatewayId" binding:"required"`
+}
+
 type GatewaySvc struct {
 	db *gorm.DB
 }
@@ -76,13 +80,8 @@ func (gs *GatewaySvc) UpdateGateway(ctx context.Context, g *Gateway) (bool, erro
 
 }
 
-func (gs *GatewaySvc) DeleteGateway(ctx context.Context, gwId uint) (bool, error) {
-	result := gs.db.Unscoped().Where("id = ?", gwId).Delete(&Gateway{})
-	return utils.ReturnBoolStateFromResult(result)
-}
-
-func (gs *GatewaySvc) DeleteGatewayByMacId(ctx context.Context, g *Gateway) (bool, error) {
-	result := gs.db.Unscoped().Where("gateway_id = ?", g.GatewayID).Delete(g)
+func (gs *GatewaySvc) DeleteGateway(ctx context.Context, gwID string) (bool, error) {
+	result := gs.db.Unscoped().Where("gateway_id = ?", gwID).Delete(&Gateway{})
 	return utils.ReturnBoolStateFromResult(result)
 }
 

@@ -133,6 +133,16 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 		return
 	}
 
+	isSuccess, err := h.svc.UpdateGateway(c.Request.Context(), gw)
+	if err != nil || !isSuccess {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Update gateway failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_GATEWAY_U, 1, false, mqttSvc.ServerUpdateGatewayPayload(gw))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -143,15 +153,6 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.UpdateGateway(c.Request.Context(), gw)
-	if err != nil || !isSuccess {
-		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Msg:        "Update gateway failed",
-			ErrorMsg:   err.Error(),
-		})
-		return
-	}
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
@@ -166,8 +167,8 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/gateway [delete]
 func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
-	dId := &models.DeleteID{}
-	err := c.ShouldBind(dId)
+	dgw := &models.DeleteGateway{}
+	err := c.ShouldBind(dgw)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -177,7 +178,7 @@ func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := h.svc.DeleteGateway(c.Request.Context(), dId.ID)
+	isSuccess, err := h.svc.DeleteGateway(c.Request.Context(), dgw.GatewayID)
 	if err != nil || !isSuccess {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
@@ -186,6 +187,17 @@ func (h *GatewayHandler) DeleteGateway(c *gin.Context) {
 		})
 		return
 	}
+
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_GATEWAY_D, 1, false, mqttSvc.ServerDeleteGatewayPayload(dgw.GatewayID))
+	if err := mqttSvc.HandleMqttErr(&t); err != nil {
+		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Msg:        "Delete gateway mqtt failed",
+			ErrorMsg:   err.Error(),
+		})
+		return
+	}
+
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 

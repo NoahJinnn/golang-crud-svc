@@ -38,8 +38,12 @@ func ServerCmdDoorlockPayload(gwId string, doorSerialId string, cmd string) stri
 }
 
 func ServerUpdateGatewayPayload(gw *models.Gateway) string {
-	return fmt.Sprintf(`{"gateway_id":"%d","area_id":"%d","name":"%s", "state":"%s"}`,
-		gw.ID, gw.AreaID, gw.Name, gw.State)
+	return fmt.Sprintf(`{"gateway_id":"%s","area_id":"%d","name":"%s", "state":"%s"}`,
+		gw.GatewayID, gw.AreaID, gw.Name, gw.State)
+}
+
+func ServerDeleteGatewayPayload(gwID string) string {
+	return fmt.Sprintf(`{"gateway_id":"%s"}`, gwID)
 }
 
 func ServerCreateRegisterPayload(

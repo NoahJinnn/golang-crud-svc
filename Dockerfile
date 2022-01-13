@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 go build -o ./$APP_NAME
 FROM alpine:3.14
 WORKDIR /app
 COPY --from=builder /app/$APP_NAME .
-
+RUN apk add --no-cache tzdata
 EXPOSE 8080
 
 CMD /app/dms-be
