@@ -37,7 +37,7 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%s", host, port))
-	opts.SetClientID("go_mqtt_client_1")
+	opts.SetClientID("go_mqtt_client_10")
 	// opts.SetUsername("emqx")
 	// opts.SetPassword("public")
 	opts.SetDefaultPublishHandler(messagePubHandler)
@@ -71,11 +71,9 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 		fmt.Println(payloadStr)
 		newGw := &models.Gateway{}
 		gwId := gjson.Get(payloadStr, "gateway_id")
-		gwState := gjson.Get(payloadStr, "state")
 		checkGw, _ := gwSvc.FindGatewayByMacID(context.Background(), gwId.String())
 		if checkGw == nil {
 			newGw.GatewayID = gwId.String()
-			newGw.State = gwState.String()
 			gwSvc.CreateGateway(context.Background(), newGw)
 		}
 
@@ -84,17 +82,13 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 			for _, v := range doorlocks.Array() {
 				doorID := v.Get("doorlock_id")
 				location := v.Get("location")
-				state := v.Get("state")
 				description := v.Get("description")
-				lastConnectTime := v.Get("last_connect_time")
 
 				dl := &models.Doorlock{
-					DoorSerialID:    doorID.String(),
-					State:           state.String(),
-					Location:        location.String(),
-					GatewayID:       gwId.String(),
-					Description:     description.String(),
-					LastConnectTime: lastConnectTime.Time(),
+					DoorSerialID: doorID.String(),
+					Location:     location.String(),
+					GatewayID:    gwId.String(),
+					Description:  description.String(),
 				}
 
 				checkDl, _ := doorlockSvc.FindDoorlockBySerialID(context.Background(), doorID.String())
@@ -194,7 +188,6 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 func parseDoorlockPayload(msg mqtt.Message) *models.Doorlock {
 	var payloadStr = string(msg.Payload())
 	doorId := gjson.Get(payloadStr, "doorlock_id")
-	state := gjson.Get(payloadStr, "state")
 	description := gjson.Get(payloadStr, "description")
 	location := gjson.Get(payloadStr, "location")
 	fmt.Printf(" %s: %s \n", msg.Topic(), payloadStr)
@@ -202,7 +195,6 @@ func parseDoorlockPayload(msg mqtt.Message) *models.Doorlock {
 	dl := &models.Doorlock{
 		Description: description.String(),
 		Location:    location.String(),
-		State:       state.String(),
 	}
 	dl.ID = uint(doorId.Uint())
 	return dl

@@ -144,7 +144,8 @@ func (h *DoorlockHandler) UpdateDoorlock(c *gin.Context) {
 		return
 	}
 
-	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_DOORLOCK_U, 1, false, mqttSvc.ServerUpdateDoorlockPayload(dl))
+	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_DOORLOCK_U, 1, false,
+		mqttSvc.ServerUpdateDoorlockPayload(dl))
 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

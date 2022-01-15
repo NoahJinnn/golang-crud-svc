@@ -1,13 +1,9 @@
 package models
 
-import "time"
-
 type SwagCreateGateway struct {
-	AreaID          uint      `json:"areaId"`
-	GatewayID       string    `json:"gatewayId"`
-	Name            string    `json:"name"`
-	LastConnectTime time.Time `json:"lastConnectTime"`
-	State           string    `json:"state"`
+	AreaID    uint   `json:"areaId"`
+	GatewayID string `json:"gatewayId"`
+	Name      string `json:"name"`
 }
 
 type SwagUpateGateway struct {
@@ -27,13 +23,11 @@ type SwagUpdateArea struct {
 }
 
 type SwagCreateDoorlock struct {
-	AreaID          uint      `json:"areaId"`
-	GatewayID       uint      `json:"gatewayId"`
-	SchedulerID     uint      `json:"schedulerId"`
-	Description     string    `json:"description"`
-	Location        string    `json:"location"`
-	LastConnectTime time.Time `json:"lastConnectTime"`
-	State           string    `json:"state"`
+	AreaID      uint   `json:"areaId"`
+	GatewayID   uint   `json:"gatewayId"`
+	SchedulerID uint   `json:"schedulerId"`
+	Description string `json:"description"`
+	Location    string `json:"location"`
 }
 
 type SwagUpdateDoorlock struct {

@@ -22,8 +22,8 @@ func ServerCreateDoorlockPayload(doorlock *models.Doorlock) string {
 }
 
 func ServerUpdateDoorlockPayload(doorlock *models.Doorlock) string {
-	msg := fmt.Sprintf(`{"doorlock_id":"%s","description":"%s","location":"%s", "state":"%s"}`,
-		doorlock.DoorSerialID, doorlock.Description, doorlock.Location, doorlock.State)
+	msg := fmt.Sprintf(`{"doorlock_id":"%s","description":"%s","location":"%s"}`,
+		doorlock.DoorSerialID, doorlock.Description, doorlock.Location)
 	return PayloadWithGatewayId(doorlock.GatewayID, msg)
 }
 
@@ -38,8 +38,8 @@ func ServerCmdDoorlockPayload(gwId string, doorSerialId string, cmd string) stri
 }
 
 func ServerUpdateGatewayPayload(gw *models.Gateway) string {
-	return fmt.Sprintf(`{"gateway_id":"%s","area_id":"%d","name":"%s", "state":"%s"}`,
-		gw.GatewayID, gw.AreaID, gw.Name, gw.State)
+	return fmt.Sprintf(`{"gateway_id":"%s","area_id":"%d","name":"%s"}`,
+		gw.GatewayID, gw.AreaID, gw.Name)
 }
 
 func ServerDeleteGatewayPayload(gwID string) string {

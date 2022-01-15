@@ -78,9 +78,7 @@ func (h *GatewayHandler) FindGatewayByID(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/gateway [post]
 func (h *GatewayHandler) CreateGateway(c *gin.Context) {
-	gw := &models.Gateway{
-		State: "disconnect",
-	}
+	gw := &models.Gateway{}
 	err := c.ShouldBind(gw)
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
@@ -218,7 +216,7 @@ func (h *GatewayHandler) DeleteGatewayDoorlock(c *gin.Context) {
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Get student failed",
+			Msg:        "Get gateway failed",
 			ErrorMsg:   err.Error(),
 		})
 		return
@@ -228,7 +226,7 @@ func (h *GatewayHandler) DeleteGatewayDoorlock(c *gin.Context) {
 	if err != nil {
 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Msg:        "Update student failed",
+			Msg:        "Delete gateway door failed",
 			ErrorMsg:   err.Error(),
 		})
 		return

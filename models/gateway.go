@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"gorm.io/gorm"
@@ -11,12 +10,10 @@ import (
 
 type Gateway struct {
 	GormModel
-	AreaID          uint       `json:"areaId"`
-	GatewayID       string     `gorm:"type:varchar(256);unique;not null;" json:"gatewayId"`
-	Name            string     `json:"name"`
-	LastConnectTime time.Time  `json:"lastConnectTime"`
-	State           string     `gorm:"not null" json:"state"`
-	Doorlocks       []Doorlock `gorm:"foreignKey:GatewayID;references:GatewayID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
+	AreaID    uint       `json:"areaId"`
+	GatewayID string     `gorm:"type:varchar(256);unique;not null;" json:"gatewayId"`
+	Name      string     `json:"name"`
+	Doorlocks []Doorlock `gorm:"foreignKey:GatewayID;references:GatewayID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
 }
 
 type DeleteGateway struct {
