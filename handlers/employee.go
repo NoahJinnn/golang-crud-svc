@@ -120,10 +120,10 @@ func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
 // Update employee
 // @Summary Update Employee By ID and MSNV
 // @Schemes
-// @Description Update employee, must have "id" and "msnv" field
+// @Description Update employee, must have correct "id" and "msnv" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	models.SwagUpdateEmployee	true	"Fields need to update an employee"
+// @Param	data	body	models.Employee	true	"Fields need to update an employee"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/employee [patch]
@@ -277,6 +277,16 @@ func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
 }
 
+// Add employee scheduler
+// @Summary Add Door Open Scheduler For Employee
+// @Schemes
+// @Description Add scheduler that allows employee open specific door
+// @Accept  json
+// @Produce json
+// @Param	data	body	models.UserSchedulerUpsert	true	"Request with Scheduler, GatewayID, DoorlockID"
+// @Success 200 {boolean} true
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/employee/{msnv}/scheduler [post]
 func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
 	msnv := c.Param("msnv")
@@ -344,107 +354,3 @@ func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
 
 	utils.ResponseJson(c, http.StatusOK, true)
 }
-
-// func (h *EmployeeHandler) UpdateEmployeeScheduler(c *gin.Context) {
-// 	usu := &models.UserSchedulerUpsert{}
-// 	msnv := c.Param("msnv")
-// 	err := c.ShouldBind(usu)
-// 	if err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Invalid req body",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	emp, err := h.svc.FindEmployeeByMSNV(c, msnv)
-// 	if err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Get employee failed",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	emp, err = h.svc.UpdateEmployeeScheduler(c.Request.Context(), emp, usu.DoorlockID, &usu.Scheduler)
-// 	if err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Update employee failed",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	scheIds := []uint{}
-// 	for _, sche := range emp.Schedulers {
-// 		scheIds = append(scheIds, sche.ID)
-// 	}
-
-// 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_U, 1, false,
-// 		mqttSvc.ServerUpdateUserPayload("0", emp.MSNV, emp.RfidPass, emp.KeypadPass, scheIds))
-// 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Update employee scheduler mqtt failed",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	utils.ResponseJson(c, http.StatusOK, true)
-// }
-
-// func (h *EmployeeHandler) DeleteEmployeeScheduler(c *gin.Context) {
-// 	usu := &models.UserSchedulerUpsert{}
-// 	msnv := c.Param("msnv")
-// 	err := c.ShouldBind(usu)
-// 	if err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Invalid req body",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	emp, err := h.svc.FindEmployeeByMSNV(c, msnv)
-// 	if err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Get employee failed",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	emp, err = h.svc.DeleteEmployeeScheduler(c.Request.Context(), emp, usu.DoorlockID, &usu.Scheduler)
-// 	if err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Update employee failed",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	scheIds := []uint{}
-// 	for _, sche := range emp.Schedulers {
-// 		scheIds = append(scheIds, sche.ID)
-// 	}
-
-// 	t := h.mqtt.Publish(mqttSvc.TOPIC_SV_USER_U, 1, false,
-// 		mqttSvc.ServerUpdateUserPayload("0", emp.MSNV, emp.RfidPass, emp.KeypadPass, scheIds))
-// 	if err := mqttSvc.HandleMqttErr(&t); err != nil {
-// 		utils.ResponseJson(c, http.StatusBadRequest, &utils.ErrorResponse{
-// 			StatusCode: http.StatusBadRequest,
-// 			Msg:        "Delete employee scheduler mqtt failed",
-// 			ErrorMsg:   err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	utils.ResponseJson(c, http.StatusOK, true)
-// }

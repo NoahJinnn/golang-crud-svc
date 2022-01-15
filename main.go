@@ -39,7 +39,7 @@ func main() {
 
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASS")
-	host := os.Getenv("SERVER_HOST")
+	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	database := os.Getenv("DB_NAME")
 
@@ -60,7 +60,7 @@ func main() {
 	scheSvc := models.NewSchedulerSvc(db)
 	cusSvc := models.NewCustomerSvc(db)
 
-	mqttHost := os.Getenv("SERVER_HOST")
+	mqttHost := os.Getenv("MQTT_HOST")
 	mqttPort := os.Getenv("MQTT_PORT")
 
 	mqttClient := mqttSvc.MqttClient(mqttHost, mqttPort, glSvc, dlSvc, gwSvc, eSvc)

@@ -106,10 +106,10 @@ func (h *StudentHandler) CreateStudent(c *gin.Context) {
 // Update student
 // @Summary Update Student By ID
 // @Schemes
-// @Description Update student, must have "id" and "mssv" field
+// @Description Update student, must have correct "id" and "mssv" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	models.SwagUpdateStudent	true	"Fields need to update a student"
+// @Param	data	body	models.Student	true	"Fields need to update a student"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/student [patch]
@@ -193,9 +193,18 @@ func (h *StudentHandler) DeleteStudent(c *gin.Context) {
 	}
 
 	utils.ResponseJson(c, http.StatusOK, isSuccess)
-
 }
 
+// Add student scheduler
+// @Summary Add Door Open Scheduler For Student
+// @Schemes
+// @Description Add scheduler that allows student open specific door
+// @Accept  json
+// @Produce json
+// @Param	data	body	models.UserSchedulerUpsert	true	"Request with Scheduler, GatewayID, DoorlockID"
+// @Success 200 {boolean} true
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /v1/student/{msnv}/scheduler [post]
 func (h *StudentHandler) AppendStudentScheduler(c *gin.Context) {
 	usu := &models.UserSchedulerUpsert{}
 	mssv := c.Param("mssv")

@@ -107,7 +107,7 @@ func (h *SchedulerHandler) CreateScheduler(c *gin.Context) {
 // @Description Update scheduler, must have "id" field
 // @Accept  json
 // @Produce json
-// @Param	data	body	models.SwagUpdateScheduler	true	"Fields need to update a scheduler"
+// @Param	data	body	models.UpdateScheduler	true	"Fields need to update a scheduler"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/scheduler [patch]
