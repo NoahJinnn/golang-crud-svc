@@ -152,11 +152,14 @@ func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.D
 
 		doorStateMsg := gjson.Get(payloadStr, "message").String()
 		doorId := gjson.Get(doorStateMsg, "doorlock_id")
-		state := gjson.Get(doorStateMsg, "state")
-		doorlockSvc.UpdateDoorlockState(context.Background(), &models.DoorlockCmd{
+		state := gjson.Get(doorStateMsg, "connect_state")
+		lastOpenTime := gjson.Get(doorStateMsg, "last_open_time")
+		doorlockSvc.UpdateDoorlockBySerialID(context.Background(), &models.Doorlock{
 			DoorSerialID: doorId.String(),
-			State:        state.String(),
+			ConnectState: state.String(),
+			LastOpenTime: uint(lastOpenTime.Uint()),
 		})
+
 		// TODO: Guarantee mqtt req/res
 		// DoorlockStateCheck <- true
 	})

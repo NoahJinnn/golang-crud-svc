@@ -23,7 +23,7 @@ func NewAreaSvc(db *gorm.DB) *AreaSvc {
 }
 
 func (as *AreaSvc) FindAllArea(ctx context.Context) (aList []Area, err error) {
-	result := as.db.Joins("Gateway").Find(&aList)
+	result := as.db.Find(&aList)
 	if err := result.Error; err != nil {
 		err = utils.HandleQueryError(err)
 		return nil, err

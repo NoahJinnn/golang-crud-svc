@@ -16,6 +16,7 @@ type Doorlock struct {
 	Description  string      `json:"description"`
 	GatewayID    string      `gorm:"type:varchar(256);" json:"gatewayId"`
 	LastOpenTime uint        `json:"lastOpenTime"`
+	ConnectState string      `json:"connectState"`
 	Schedulers   []Scheduler `gorm:"foreignKey:DoorSerialID;references:DoorSerialID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
@@ -83,6 +84,11 @@ func (dls *DoorlockSvc) CreateDoorlock(ctx context.Context, dl *Doorlock) (*Door
 
 func (dls *DoorlockSvc) UpdateDoorlock(ctx context.Context, dl *Doorlock) (bool, error) {
 	result := dls.db.Model(&dl).Where("id = ?", dl.ID).Updates(dl)
+	return utils.ReturnBoolStateFromResult(result)
+}
+
+func (dls *DoorlockSvc) UpdateDoorlockBySerialID(ctx context.Context, dl *Doorlock) (bool, error) {
+	result := dls.db.Model(&dl).Where("door_serial_id = ?", dl.DoorSerialID).Updates(dl)
 	return utils.ReturnBoolStateFromResult(result)
 }
 
