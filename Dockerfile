@@ -14,6 +14,7 @@ FROM alpine:3.14
 WORKDIR /app
 COPY --from=builder /app/$APP_NAME .
 RUN apk add --no-cache tzdata
+RUN cp /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
 EXPOSE 8080
 
 CMD /app/dms-be

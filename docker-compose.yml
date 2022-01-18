@@ -9,6 +9,7 @@ services:
         environment:
             - ACCEPT_EULA=Y
             - SA_PASSWORD=Iot@@123
+            - TZ=Asia/Ho_Chi_Minh
         volumes:
             - ./data:/var/opt/mssql
     emqx:
