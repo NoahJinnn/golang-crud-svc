@@ -70,7 +70,7 @@ func (h *GatewayHandler) FindGatewayByID(c *gin.Context) {
 // Create gateway
 // @Summary Create Gateway
 // @Schemes
-// @Description Create gateway
+// @Description Create gateway. Send created info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.SwagCreateGateway	true	"Fields need to create a gateway"
@@ -112,7 +112,7 @@ func (h *GatewayHandler) CreateGateway(c *gin.Context) {
 // Update gateway
 // @Summary Update Gateway By ID
 // @Schemes
-// @Description Update gateway, must have "id" field
+// @Description Update gateway, must have "id" field. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.SwagUpateGateway	true	"Fields need to update a gateway"
@@ -157,7 +157,7 @@ func (h *GatewayHandler) UpdateGateway(c *gin.Context) {
 // Delete gateway
 // @Summary Delete Gateway By ID
 // @Schemes
-// @Description Delete gateway using "id" field
+// @Description Delete gateway using "id" field. Send deleted info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	object{id=int}	true	"Gateway ID"

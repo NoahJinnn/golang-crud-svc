@@ -104,7 +104,7 @@ func (h *SchedulerHandler) CreateScheduler(c *gin.Context) {
 // Update scheduler
 // @Summary Update Scheduler By ID
 // @Schemes
-// @Description Update scheduler, must have "id" field
+// @Description Update scheduler, must have "id" field. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.UpdateScheduler	true	"Fields need to update a scheduler"
@@ -150,7 +150,7 @@ func (h *SchedulerHandler) UpdateScheduler(c *gin.Context) {
 // Delete scheduler
 // @Summary Delete Scheduler By ID
 // @Schemes
-// @Description Delete scheduler using "id" field
+// @Description Delete scheduler using "id" field. Send deleted info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	object{id=int}	true	"Scheduler ID"

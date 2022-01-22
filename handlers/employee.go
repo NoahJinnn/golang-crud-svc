@@ -72,7 +72,7 @@ func (h *EmployeeHandler) FindEmployeeByMSNV(c *gin.Context) {
 // Create employee
 // @Summary Create Employee
 // @Schemes
-// @Description Create employee
+// @Description Create employee. Send created info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.SwagCreateEmployee	true	"Fields need to create a employee"
@@ -120,7 +120,7 @@ func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
 // Update employee
 // @Summary Update Employee By ID and MSNV
 // @Schemes
-// @Description Update employee, must have correct "id" and "msnv" field
+// @Description Update employee, must have correct "id" and "msnv" field. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.Employee	true	"Fields need to update an employee"
@@ -212,7 +212,7 @@ func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
 // Delete employee
 // @Summary Delete Employee By MSNV
 // @Schemes
-// @Description Delete employee using "msnv" field
+// @Description Delete employee using "msnv" field. Send deleted info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.DeleteEmployee	true	"Employee MSNV"
@@ -280,15 +280,15 @@ func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
 // Add employee scheduler
 // @Summary Add Door Open Scheduler For Employee
 // @Schemes
-// @Description Add scheduler that allows employee open specific door
+// @Description Add scheduler that allows employee open specific door. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
-// @Param	data	body	models.UserSchedulerUpsert	true	"Request with Scheduler, GatewayID, DoorlockID"
+// @Param	data	body	models.UserSchedulerReq	true	"Request with Scheduler, GatewayID, DoorlockID"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/employee/{msnv}/scheduler [post]
 func (h *EmployeeHandler) AppendEmployeeScheduler(c *gin.Context) {
-	usu := &models.UserSchedulerUpsert{}
+	usu := &models.UserSchedulerReq{}
 	msnv := c.Param("msnv")
 	err := c.ShouldBind(usu)
 	if err != nil {

@@ -31,6 +31,7 @@ type Scheduler struct {
 	CustomerID     *string `gorm:"type:varchar(256);" json:"customerId"`
 }
 
+// Struct defines HTTP request payload for updating scheduler
 type UpdateScheduler struct {
 	UserID       string `json:"userId" binding:"required"`
 	DoorSerialID string `json:"doorSerialId" binding:"required"`

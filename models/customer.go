@@ -17,6 +17,7 @@ type Customer struct {
 	Schedulers []Scheduler `gorm:"foreignKey:CustomerID;references:CCCD;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
+// Struct defines HTTP request payload for deleting customer
 type DeleteCustomer struct {
 	CCCD string `json:"cccd" binding:"required"`
 }

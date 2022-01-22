@@ -70,7 +70,7 @@ func (h *DoorlockHandler) FindDoorlockByID(c *gin.Context) {
 // Create doorlock
 // @Summary Create Doorlock
 // @Schemes
-// @Description Create doorlock
+// @Description Create doorlock. Send created info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.SwagCreateDoorlock	true	"Fields need to create a doorlock"
@@ -125,7 +125,7 @@ func (h *DoorlockHandler) CreateDoorlock(c *gin.Context) {
 // Update doorlock
 // @Summary Update Doorlock By ID
 // @Schemes
-// @Description Update doorlock, must have "id" field
+// @Description Update doorlock, must have "id" field. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.SwagUpdateDoorlock	true	"Fields need to update a doorlock"
@@ -170,7 +170,7 @@ func (h *DoorlockHandler) UpdateDoorlock(c *gin.Context) {
 // Update doorlock state
 // @Summary Update Doorlock State By ID
 // @Schemes
-// @Description Update doorlock state, must have "id" field
+// @Description Update doorlock state, must have "id" field. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.DoorlockCmd	true	"Fields need to update a doorlock state"
@@ -227,7 +227,7 @@ func (h *DoorlockHandler) UpdateDoorlockCmd(c *gin.Context) {
 // Delete doorlock
 // @Summary Delete Doorlock By ID
 // @Schemes
-// @Description Delete doorlock using "id" field
+// @Description Delete doorlock using "id" field. Send deleted info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.DoorlockDelete	true	"Doorlock Delete payload"

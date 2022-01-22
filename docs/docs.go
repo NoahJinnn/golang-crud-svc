@@ -359,7 +359,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserSchedulerUpsert"
+                            "$ref": "#/definitions/models.UserSchedulerReq"
                         }
                     }
                 ],
@@ -769,7 +769,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserSchedulerUpsert"
+                            "$ref": "#/definitions/models.UserSchedulerReq"
                         }
                     }
                 ],
@@ -1363,7 +1363,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserSchedulerUpsert"
+                            "$ref": "#/definitions/models.UserSchedulerReq"
                         }
                     }
                 ],
@@ -2095,7 +2095,7 @@ var doc = `{
                 }
             }
         },
-        "models.UserSchedulerUpsert": {
+        "models.UserSchedulerReq": {
             "type": "object",
             "required": [
                 "doorlockId",

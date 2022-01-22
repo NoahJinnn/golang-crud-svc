@@ -20,12 +20,14 @@ type Doorlock struct {
 	Schedulers   []Scheduler `gorm:"foreignKey:DoorSerialID;references:DoorSerialID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
+// Struct defines HTTP request payload for openning doorlock
 type DoorlockCmd struct {
 	DoorSerialID string `json:"doorSerialId"`
 	GatewayID    string `json:"gatewayId"`
 	State        string `json:"state"`
 }
 
+// Struct defines HTTP request payload for deleting doorlock
 type DoorlockDelete struct {
 	DoorSerialID string `json:"doorSerialId" binding:"required"`
 	GatewayID    string `json:"gatewayId"`

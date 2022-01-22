@@ -19,6 +19,7 @@ type Student struct {
 	Schedulers []Scheduler `gorm:"foreignKey:StudentID;references:MSSV;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
+// Struct defines HTTP request payload for deleting student
 type DeleteStudent struct {
 	MSSV string `json:"mssv" binding:"required"`
 }

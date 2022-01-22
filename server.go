@@ -52,8 +52,6 @@ func setupRouter(
 		v1R.PATCH("/student", sHdlr.UpdateStudent)
 		v1R.DELETE("/student", sHdlr.DeleteStudent)
 		v1R.POST("/student/:mssv/scheduler", sHdlr.AppendStudentScheduler)
-		// v1R.PATCH("/student/:id/scheduler", sHdlr.UpdateStudentScheduler)
-		// v1R.DELETE("/student/:id/scheduler", sHdlr.DeleteStudentScheduler)
 
 		// Employee routes
 		v1R.GET("/employees", eHdlr.FindAllEmployee)
@@ -62,8 +60,6 @@ func setupRouter(
 		v1R.PATCH("/employee", eHdlr.UpdateEmployee)
 		v1R.DELETE("/employee", eHdlr.DeleteEmployee)
 		v1R.POST("/employee/:msnv/scheduler", eHdlr.AppendEmployeeScheduler)
-		// v1R.PATCH("/employee/:msnv/scheduler", eHdlr.UpdateEmployeeScheduler)
-		// v1R.DELETE("/employee/:msnv/scheduler", eHdlr.DeleteEmployeeScheduler)
 
 		// Customer routes
 		v1R.GET("/customers", cusHdlr.FindAllCustomer)
@@ -72,8 +68,6 @@ func setupRouter(
 		v1R.PATCH("/customer", cusHdlr.UpdateCustomer)
 		v1R.DELETE("/customer", cusHdlr.DeleteCustomer)
 		v1R.POST("/customer/:cccd/scheduler", cusHdlr.AppendCustomerScheduler)
-		// v1R.PATCH("/customer/:id/scheduler", cusHdlr.UpdateCustomerScheduler)
-		// v1R.DELETE("/customer/:id/scheduler", cusHdlr.DeleteCustomerScheduler)
 
 		// Scheduler routes
 		v1R.GET("/schedulers", scheHdlr.FindAllScheduler)

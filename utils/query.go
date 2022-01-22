@@ -1,3 +1,4 @@
+// Package utils provides utility functions using in entire app
 package utils
 
 import (
@@ -7,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Error handler for ORM query
 func HandleQueryError(err error) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return fmt.Errorf("can't find any record")
@@ -14,6 +16,7 @@ func HandleQueryError(err error) error {
 	return err
 }
 
+// Define return values for update, delete query
 func ReturnBoolStateFromResult(result *gorm.DB) (bool, error) {
 	err := result.Error
 	ra := result.RowsAffected

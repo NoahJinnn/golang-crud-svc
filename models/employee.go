@@ -21,6 +21,7 @@ type Employee struct {
 	Schedulers      []Scheduler `gorm:"foreignKey:EmployeeID;references:MSNV;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"schedulers"`
 }
 
+// Struct defines HTTP request payload for deleting employee
 type DeleteEmployee struct {
 	MSNV string `json:"msnv" binding:"required"`
 }

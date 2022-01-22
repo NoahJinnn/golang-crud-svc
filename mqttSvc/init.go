@@ -1,3 +1,6 @@
+// Package mqttSvc provides mqtt connections, configs,
+// mqtt topics, subscribe callbacks,
+// mqtt error handlers, mqtt payload parsings
 package mqttSvc
 
 import (
@@ -26,6 +29,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	fmt.Printf("Connect lost: %v", err)
 }
 
+// Define mqtt connections and configs
 func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc, empSvc *models.EmployeeSvc) mqtt.Client {
 
 	mqtt.ERROR = log.New(os.Stdout, "[MQTT-ERROR] ", 0)
@@ -52,6 +56,7 @@ func MqttClient(host string, port string, logSvc *models.LogSvc, doorlockSvc *mo
 	return client
 }
 
+// Define all subscribe logic callbacks for payloads that received from gateway
 func subGateway(client mqtt.Client, logSvc *models.LogSvc, doorlockSvc *models.DoorlockSvc, gwSvc *models.GatewaySvc, empSvc *models.EmployeeSvc) {
 
 	t := client.Subscribe(string(TOPIC_GW_SHUTDOWN), 1, func(client mqtt.Client, msg mqtt.Message) {

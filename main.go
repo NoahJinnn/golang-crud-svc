@@ -1,3 +1,4 @@
+// Package main contains: http app, mqtt app, swagger doc, ORM setup
 package main
 
 import (
@@ -16,20 +17,6 @@ import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
-
-func initSwagger(r *gin.Engine) {
-	ginSwagger.WrapHandler(swaggerFiles.Handler,
-		ginSwagger.URL("http://localhost:8080/swagger/doc.json"),
-		ginSwagger.DefaultModelsExpandDepth(-1))
-	// programmatically set swagger info
-	// Note: Use config later
-	docs.SwaggerInfo.Title = "DMS Backend API"
-	// docs.SwaggerInfo.Version = "2.0"
-	docs.SwaggerInfo.Description = "This is DMS backend server"
-	docs.SwaggerInfo.Host = "http://iot.hcmue.space:8002"
-	docs.SwaggerInfo.BasePath = "/v1"
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -79,4 +66,16 @@ func main() {
 	initSwagger(r)
 	r.Run(":8080")
 	mqttClient.Disconnect(250)
+}
+
+func initSwagger(r *gin.Engine) {
+	ginSwagger.WrapHandler(swaggerFiles.Handler,
+		ginSwagger.URL("http://localhost:8080/swagger/doc.json"),
+		ginSwagger.DefaultModelsExpandDepth(-1))
+	// Programmatically set swagger info
+	docs.SwaggerInfo.Title = "DMS Backend API"
+	docs.SwaggerInfo.Description = "This is DMS backend server"
+	docs.SwaggerInfo.Host = "http://iot.hcmue.space:8002"
+	docs.SwaggerInfo.BasePath = "/v1"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

@@ -24,31 +24,31 @@ definitions:
         type: string
       schedulers:
         items:
-          $ref: '#/definitions/models.Scheduler'
+          $ref: "#/definitions/models.Scheduler"
         type: array
     required:
-    - cccd
+      - cccd
     type: object
   models.DeleteCustomer:
     properties:
       cccd:
         type: string
     required:
-    - cccd
+      - cccd
     type: object
   models.DeleteEmployee:
     properties:
       msnv:
         type: string
     required:
-    - msnv
+      - msnv
     type: object
   models.DeleteStudent:
     properties:
       mssv:
         type: string
     required:
-    - mssv
+      - mssv
     type: object
   models.Doorlock:
     properties:
@@ -66,7 +66,7 @@ definitions:
         type: string
       schedulers:
         items:
-          $ref: '#/definitions/models.Scheduler'
+          $ref: "#/definitions/models.Scheduler"
         type: array
     type: object
   models.DoorlockCmd:
@@ -85,7 +85,7 @@ definitions:
       gatewayId:
         type: string
     required:
-    - doorSerialId
+      - doorSerialId
     type: object
   models.Employee:
     properties:
@@ -111,10 +111,10 @@ definitions:
         type: string
       schedulers:
         items:
-          $ref: '#/definitions/models.Scheduler'
+          $ref: "#/definitions/models.Scheduler"
         type: array
     required:
-    - msnv
+      - msnv
     type: object
   models.Gateway:
     properties:
@@ -122,7 +122,7 @@ definitions:
         type: integer
       doorlocks:
         items:
-          $ref: '#/definitions/models.Doorlock'
+          $ref: "#/definitions/models.Doorlock"
         type: array
       gatewayId:
         type: string
@@ -209,15 +209,15 @@ definitions:
         type: string
       schedulers:
         items:
-          $ref: '#/definitions/models.Scheduler'
+          $ref: "#/definitions/models.Scheduler"
         type: array
     required:
-    - mssv
+      - mssv
     type: object
   models.SwagCreateArea:
     properties:
       gateway:
-        $ref: '#/definitions/models.Gateway'
+        $ref: "#/definitions/models.Gateway"
       manager:
         type: string
       name:
@@ -236,7 +236,7 @@ definitions:
       rfidPass:
         type: string
     required:
-    - cccd
+      - cccd
     type: object
   models.SwagCreateDoorlock:
     properties:
@@ -272,7 +272,7 @@ definitions:
       role:
         type: string
     required:
-    - msnv
+      - msnv
     type: object
   models.SwagCreateGateway:
     properties:
@@ -335,7 +335,7 @@ definitions:
       rfidPass:
         type: string
     required:
-    - mssv
+      - mssv
     type: object
   models.SwagUpateGateway:
     properties:
@@ -351,7 +351,7 @@ definitions:
   models.SwagUpdateArea:
     properties:
       gateway:
-        $ref: '#/definitions/models.Gateway'
+        $ref: "#/definitions/models.Gateway"
       id:
         type: integer
       manager:
@@ -421,10 +421,10 @@ definitions:
       weekDay:
         type: integer
     required:
-    - doorSerialId
-    - userId
+      - doorSerialId
+      - userId
     type: object
-  models.UserSchedulerUpsert:
+  models.UserSchedulerReq:
     properties:
       amount:
         type: integer
@@ -473,8 +473,8 @@ definitions:
       weekDay:
         type: integer
     required:
-    - doorlockId
-    - gatewayId
+      - doorlockId
+      - gatewayId
     type: object
   utils.ErrorResponse:
     properties:
@@ -491,22 +491,22 @@ paths:
   /v1/area:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete area using "id" field
       parameters:
-      - description: Area ID
-        in: body
-        name: data
-        required: true
-        schema:
-          allOf:
-          - type: object
-          - properties:
-              id:
-                type: integer
-            type: object
+        - description: Area ID
+          in: body
+          name: data
+          required: true
+          schema:
+            allOf:
+              - type: object
+              - properties:
+                  id:
+                    type: integer
+                type: object
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -515,21 +515,21 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Delete Area By ID
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update area, must have "id" field
       parameters:
-      - description: Fields need to update a area
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagUpdateArea'
+        - description: Fields need to update a area
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagUpdateArea"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -538,85 +538,85 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Area By ID
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create area
       parameters:
-      - description: Fields need to create a area
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagCreateArea'
+        - description: Fields need to create a area
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagCreateArea"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Area'
+            $ref: "#/definitions/models.Area"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Create Area
   /v1/area/{id}:
     get:
       description: find area info by area id
       parameters:
-      - description: Area ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Area ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Area'
+            $ref: "#/definitions/models.Area"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find Area By ID
   /v1/areas:
     get:
       description: find all areas info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.Area'
+                $ref: "#/definitions/models.Area"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All Area
   /v1/customer:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete customer using "cccd" field
       parameters:
-      - description: Customer CCCD
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.DeleteCustomer'
+        - description: Customer CCCD
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.DeleteCustomer"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -625,21 +625,21 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Delete Customer By CCCD
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update customer, must have correct "id" and "cccd" field
       parameters:
-      - description: Fields need to update a customer
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.Customer'
+        - description: Fields need to update a customer
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.Customer"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -648,66 +648,66 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Customer By ID
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create customer
       parameters:
-      - description: Fields need to create a customer
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagCreateCustomer'
+        - description: Fields need to create a customer
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagCreateCustomer"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Customer'
+            $ref: "#/definitions/models.Customer"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Create Customer
   /v1/customer/{cccd}:
     get:
       description: find customer info by customer cccd
       parameters:
-      - description: Customer CCCD
-        in: path
-        name: cccd
-        required: true
-        type: string
+        - description: Customer CCCD
+          in: path
+          name: cccd
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Customer'
+            $ref: "#/definitions/models.Customer"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find Customer By CCCD
   /v1/customer/{cccd}/scheduler:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Add scheduler that allows customer open specific door
       parameters:
-      - description: Request with Scheduler, GatewayID, DoorlockID
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.UserSchedulerUpsert'
+        - description: Request with Scheduler, GatewayID, DoorlockID
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.UserSchedulerReq"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -716,41 +716,41 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Add Door Open Scheduler For Customer
   /v1/customers:
     get:
       description: find all customers info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.Customer'
+                $ref: "#/definitions/models.Customer"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All Customer
   /v1/doorlock:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete doorlock using "id" field
       parameters:
-      - description: Doorlock Delete payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.DoorlockDelete'
+        - description: Doorlock Delete payload
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.DoorlockDelete"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -759,21 +759,21 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Delete Doorlock By ID
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update doorlock, must have "id" field
       parameters:
-      - description: Fields need to update a doorlock
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagUpdateDoorlock'
+        - description: Fields need to update a doorlock
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagUpdateDoorlock"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -782,66 +782,66 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Doorlock By ID
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create doorlock
       parameters:
-      - description: Fields need to create a doorlock
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagCreateDoorlock'
+        - description: Fields need to create a doorlock
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagCreateDoorlock"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Doorlock'
+            $ref: "#/definitions/models.Doorlock"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Create Doorlock
   /v1/doorlock/{id}:
     get:
       description: find doorlock info by doorlock id
       parameters:
-      - description: Doorlock ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Doorlock ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Doorlock'
+            $ref: "#/definitions/models.Doorlock"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find Doorlock By ID
   /v1/doorlock/state:
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update doorlock state, must have "id" field
       parameters:
-      - description: Fields need to update a doorlock state
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.DoorlockCmd'
+        - description: Fields need to update a doorlock state
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.DoorlockCmd"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -850,41 +850,41 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Doorlock State By ID
   /v1/doorlocks:
     get:
       description: find all doorlocks info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.Doorlock'
+                $ref: "#/definitions/models.Doorlock"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All Doorlock
   /v1/employee:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete employee using "msnv" field
       parameters:
-      - description: Employee MSNV
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.DeleteEmployee'
+        - description: Employee MSNV
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.DeleteEmployee"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -893,21 +893,21 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Delete Employee By MSNV
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update employee, must have correct "id" and "msnv" field
       parameters:
-      - description: Fields need to update an employee
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.Employee'
+        - description: Fields need to update an employee
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.Employee"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -916,66 +916,66 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Employee By ID and MSNV
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create employee
       parameters:
-      - description: Fields need to create a employee
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagCreateEmployee'
+        - description: Fields need to create a employee
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagCreateEmployee"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Employee'
+            $ref: "#/definitions/models.Employee"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Create Employee
   /v1/employee/{msnv}:
     get:
       description: find employee info by employee msnv
       parameters:
-      - description: Employee MSNV
-        in: path
-        name: msnv
-        required: true
-        type: string
+        - description: Employee MSNV
+          in: path
+          name: msnv
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Employee'
+            $ref: "#/definitions/models.Employee"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find Employee By MSNV
   /v1/employee/{msnv}/scheduler:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Add scheduler that allows employee open specific door
       parameters:
-      - description: Request with Scheduler, GatewayID, DoorlockID
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.UserSchedulerUpsert'
+        - description: Request with Scheduler, GatewayID, DoorlockID
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.UserSchedulerReq"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -984,46 +984,46 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Add Door Open Scheduler For Employee
   /v1/employees:
     get:
       description: find all employees info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.Employee'
+                $ref: "#/definitions/models.Employee"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All Employee
   /v1/gateway:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete gateway using "id" field
       parameters:
-      - description: Gateway ID
-        in: body
-        name: data
-        required: true
-        schema:
-          allOf:
-          - type: object
-          - properties:
-              id:
-                type: integer
-            type: object
+        - description: Gateway ID
+          in: body
+          name: data
+          required: true
+          schema:
+            allOf:
+              - type: object
+              - properties:
+                  id:
+                    type: integer
+                type: object
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1032,21 +1032,21 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Delete Gateway By ID
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update gateway, must have "id" field
       parameters:
-      - description: Fields need to update a gateway
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagUpateGateway'
+        - description: Fields need to update a gateway
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagUpateGateway"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1055,130 +1055,130 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Gateway By ID
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create gateway
       parameters:
-      - description: Fields need to create a gateway
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagCreateGateway'
+        - description: Fields need to create a gateway
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagCreateGateway"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Gateway'
+            $ref: "#/definitions/models.Gateway"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Create Gateway
   /v1/gateway/{id}:
     get:
       description: find gateway and doorlock info by gateway id
       parameters:
-      - description: Gateway ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Gateway ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Gateway'
+            $ref: "#/definitions/models.Gateway"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find Gateway By ID
   /v1/gatewayLog/{id}:
     get:
       description: find gateway log info by id
       parameters:
-      - description: GatewayLog ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: GatewayLog ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.GatewayLog'
+            $ref: "#/definitions/models.GatewayLog"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find GatewayLog By ID
   /v1/gatewayLogs:
     get:
       description: find all gateway logs info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.GatewayLog'
+                $ref: "#/definitions/models.GatewayLog"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All GatewayLog
   /v1/gateways:
     get:
       description: find all gateways info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.Gateway'
+                $ref: "#/definitions/models.Gateway"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All Gateway
   /v1/scheduler:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete scheduler using "id" field
       parameters:
-      - description: Scheduler ID
-        in: body
-        name: data
-        required: true
-        schema:
-          allOf:
-          - type: object
-          - properties:
-              id:
-                type: integer
-            type: object
+        - description: Scheduler ID
+          in: body
+          name: data
+          required: true
+          schema:
+            allOf:
+              - type: object
+              - properties:
+                  id:
+                    type: integer
+                type: object
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1187,21 +1187,21 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Delete Scheduler By ID
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update scheduler, must have "id" field
       parameters:
-      - description: Fields need to update a scheduler
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateScheduler'
+        - description: Fields need to update a scheduler
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.UpdateScheduler"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1210,85 +1210,85 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Scheduler By ID
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create scheduler
       parameters:
-      - description: Fields need to create a scheduler
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagCreateScheduler'
+        - description: Fields need to create a scheduler
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagCreateScheduler"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Scheduler'
+            $ref: "#/definitions/models.Scheduler"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Create Scheduler
   /v1/scheduler/{id}:
     get:
       description: find scheduler info by scheduler id
       parameters:
-      - description: Scheduler ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Scheduler ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Scheduler'
+            $ref: "#/definitions/models.Scheduler"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find Scheduler By ID
   /v1/schedulers:
     get:
       description: find all scheduler info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.Scheduler'
+                $ref: "#/definitions/models.Scheduler"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All Scheduler
   /v1/student:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete student using "mssv" field
       parameters:
-      - description: Student MSSV
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.DeleteStudent'
+        - description: Student MSSV
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.DeleteStudent"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1297,21 +1297,21 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Delete Student By MSSV
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update student, must have correct "id" and "mssv" field
       parameters:
-      - description: Fields need to update a student
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.Student'
+        - description: Fields need to update a student
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.Student"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1320,45 +1320,45 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Update Student By ID
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create student
       parameters:
-      - description: Fields need to create a student
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.SwagCreateStudent'
+        - description: Fields need to create a student
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.SwagCreateStudent"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Student'
+            $ref: "#/definitions/models.Student"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Create Student
   /v1/student/{msnv}/scheduler:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Add scheduler that allows student open specific door
       parameters:
-      - description: Request with Scheduler, GatewayID, DoorlockID
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.UserSchedulerUpsert'
+        - description: Request with Scheduler, GatewayID, DoorlockID
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: "#/definitions/models.UserSchedulerReq"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1367,46 +1367,46 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Add Door Open Scheduler For Student
   /v1/student/{mssv}:
     get:
       description: find student info by student mssv
       parameters:
-      - description: Student MSSV
-        in: path
-        name: mssv
-        required: true
-        type: string
+        - description: Student MSSV
+          in: path
+          name: mssv
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Student'
+            $ref: "#/definitions/models.Student"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find Student By MSSV
   /v1/students:
     get:
       description: find all students info
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
               items:
-                $ref: '#/definitions/models.Student'
+                $ref: "#/definitions/models.Student"
               type: array
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: "#/definitions/utils.ErrorResponse"
       summary: Find All Student
 swagger: "2.0"

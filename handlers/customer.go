@@ -106,7 +106,7 @@ func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
 // Update customer
 // @Summary Update Customer By ID
 // @Schemes
-// @Description Update customer, must have correct "id" and "cccd" field
+// @Description Update customer, must have correct "id" and "cccd" field. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.Customer	true	"Fields need to update a customer"
@@ -151,7 +151,7 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 // Delete customer
 // @Summary Delete Customer By CCCD
 // @Schemes
-// @Description Delete customer using "cccd" field
+// @Description Delete customer using "cccd" field. Send deleted info to MQTT broker
 // @Accept  json
 // @Produce json
 // @Param	data	body	models.DeleteCustomer	true	"Customer CCCD"
@@ -197,15 +197,15 @@ func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 // Add customer scheduler
 // @Summary Add Door Open Scheduler For Customer
 // @Schemes
-// @Description Add scheduler that allows customer open specific door
+// @Description Add scheduler that allows customer open specific door. Send updated info to MQTT broker
 // @Accept  json
 // @Produce json
-// @Param	data	body	models.UserSchedulerUpsert	true	"Request with Scheduler, GatewayID, DoorlockID"
+// @Param	data	body	models.UserSchedulerReq	true	"Request with Scheduler, GatewayID, DoorlockID"
 // @Success 200 {boolean} true
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /v1/customer/{cccd}/scheduler [post]
 func (h *CustomerHandler) AppendCustomerScheduler(c *gin.Context) {
-	usu := &models.UserSchedulerUpsert{}
+	usu := &models.UserSchedulerReq{}
 	cccd := c.Param("cccd")
 	err := c.ShouldBind(usu)
 	if err != nil {

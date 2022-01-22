@@ -16,6 +16,7 @@ type Gateway struct {
 	Doorlocks []Doorlock `gorm:"foreignKey:GatewayID;references:GatewayID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"doorlocks"`
 }
 
+// Struct defines HTTP request payload for deleting gateway
 type DeleteGateway struct {
 	GatewayID string `json:"gatewayId" binding:"required"`
 }
