@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/ecoprohcm/DMS_BackendServer/models"
-	"github.com/ecoprohcm/DMS_BackendServer/mqttSvc"
-	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/trancongduynguyen1997/golang-crud-svc/models"
+	"github.com/trancongduynguyen1997/golang-crud-svc/mqttSvc"
+	"github.com/trancongduynguyen1997/golang-crud-svc/utils"
 )
 
 type GatewayHandler struct {

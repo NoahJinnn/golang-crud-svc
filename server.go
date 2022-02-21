@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ecoprohcm/DMS_BackendServer/handlers"
 	"github.com/gin-gonic/gin"
+	"github.com/trancongduynguyen1997/golang-crud-svc/handlers"
 )
 
 func setupRouter(

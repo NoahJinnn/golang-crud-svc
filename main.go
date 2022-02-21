@@ -6,14 +6,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/ecoprohcm/DMS_BackendServer/docs"
-	"github.com/ecoprohcm/DMS_BackendServer/handlers"
-	"github.com/ecoprohcm/DMS_BackendServer/models"
-	"github.com/ecoprohcm/DMS_BackendServer/mqttSvc"
 	"github.com/gin-gonic/gin" // swagger embed files
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"github.com/trancongduynguyen1997/golang-crud-svc/docs"
+	"github.com/trancongduynguyen1997/golang-crud-svc/handlers"
+	"github.com/trancongduynguyen1997/golang-crud-svc/models"
+	"github.com/trancongduynguyen1997/golang-crud-svc/mqttSvc"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
@@ -75,7 +75,7 @@ func initSwagger(r *gin.Engine) {
 	// Programmatically set swagger info
 	docs.SwaggerInfo.Title = "DMS Backend API"
 	docs.SwaggerInfo.Description = "This is DMS backend server"
-	docs.SwaggerInfo.Host = "http://iot.hcmue.space:8002"
+	docs.SwaggerInfo.Host = "localhost:8002"
 	docs.SwaggerInfo.BasePath = "/v1"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

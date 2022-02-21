@@ -1,4 +1,4 @@
-module github.com/ecoprohcm/DMS_BackendServer
+module github.com/trancongduynguyen1997/golang-crud-svc
 
 go 1.17
 

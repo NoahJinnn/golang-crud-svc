@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ecoprohcm/DMS_BackendServer/models"
+	"github.com/trancongduynguyen1997/golang-crud-svc/models"
 )
 
 type UserIDPassword struct {

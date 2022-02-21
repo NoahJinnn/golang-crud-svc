@@ -4,9 +4,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/ecoprohcm/DMS_BackendServer/models"
-	"github.com/ecoprohcm/DMS_BackendServer/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/trancongduynguyen1997/golang-crud-svc/models"
+	"github.com/trancongduynguyen1997/golang-crud-svc/utils"
 )
 
 type AreaHandler struct {

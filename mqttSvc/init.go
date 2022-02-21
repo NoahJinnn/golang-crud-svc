@@ -10,8 +10,8 @@ import (
 	"os"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/ecoprohcm/DMS_BackendServer/models"
 	"github.com/tidwall/gjson"
+	"github.com/trancongduynguyen1997/golang-crud-svc/models"
 )
 
 // TODO: Guarantee mqtt req/res

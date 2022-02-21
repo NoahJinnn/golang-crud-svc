@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ecoprohcm/DMS_BackendServer/utils"
+	"github.com/trancongduynguyen1997/golang-crud-svc/utils"
 	"gorm.io/gorm"
 )
 
